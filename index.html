@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXON | Neural OS</title>
+    <title>AXON | Neural OS v3</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
 </head>
@@ -12,36 +12,35 @@
     <nav id="sidebar" class="hidden">
         <div class="sidebar-logo">
             <div class="logo-box">A</div>
-            <span>AXON <strong>OS</strong></span>
+            <span>AXON <strong>PRO</strong></span>
         </div>
         <ul class="nav-items">
-            <li onclick="nav('dash')">📊 Dashboard</li>
-            <li onclick="nav('profile-setup')">⚙️ Parametri Biometrici</li>
-            <li onclick="nav('workout-gen')">🏋️ Generatore Schede</li>
+            <li onclick="nav('dash')">📊 Dashboard Analitica</li>
+            <li onclick="nav('profile-setup')">⚙️ Configurazione Biometrica</li>
+            <li onclick="nav('workout-gen')">🏋️ Generatore Protocolli</li>
         </ul>
-        <button onclick="logout()" class="btn-exit">TERMINA SESSIONE</button>
+        <button onclick="logout()" class="btn-exit">DISCONNETTI</button>
     </nav>
 
     <main id="app-core">
         <section id="auth-screen" class="screen">
             <div class="glass-card auth-card">
                 <div class="logo-box large">A</div>
-                <h1 id="auth-title">Neural Access</h1>
+                <h1>Accedi al Sistema</h1>
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="pass" placeholder="Password">
-                <button onclick="handleAuth()" id="auth-btn" class="glow-btn">ACCEDI</button>
-                <p id="auth-toggle-text">Non hai un account? <span onclick="toggleAuth()">Registrati ora</span></p>
+                <button onclick="handleAuth()" class="glow-btn">INIZIALIZZA</button>
             </div>
         </section>
 
         <section id="profile-setup" class="screen hidden">
-            <div class="glass-card form-container">
-                <h2>Asset Atleta</h2>
+            <div class="glass-card">
+                <h2>Parametri Atleta</h2>
                 <div class="form-grid">
-                    <div class="input-group"><label>Giorni/Settimana</label><input type="number" id="f-days" value="4"></div>
-                    <div class="input-group"><label>Durata Sessione (Min)</label><input type="number" id="f-duration" value="60"></div>
+                    <div class="input-group"><label>Allenamenti a settimana</label><input type="number" id="f-days" value="4"></div>
+                    <div class="input-group"><label>Minuti disponibili/sessione</label><input type="number" id="f-duration" value="90"></div>
                     <div class="input-group">
-                        <label>Esperienza</label>
+                        <label>Livello Esperienza</label>
                         <select id="f-exp">
                             <option value="beginner">Principiante</option>
                             <option value="intermediate" selected>Intermedio</option>
@@ -49,34 +48,32 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Obiettivo</label>
+                        <label>Obiettivo Dominante</label>
                         <select id="f-goal">
-                            <option value="ipertrofia">Massa (Ipertrofia)</option>
-                            <option value="forza" selected>Forza Pura</option>
+                            <option value="ipertrofia">Ipertrofia (Massa)</option>
+                            <option value="forza">Forza Massima</option>
                         </select>
                     </div>
                     <div class="input-group full-width">
-                        <label>Punto Carente (Priorità)</label>
+                        <label>Focus Gruppo Carente</label>
                         <select id="f-weak">
                             <option value="Petto">Pettorali</option>
-                            <option value="Schiena">Dorsali/Schiena</option>
-                            <option value="Gambe">Gambe/Glutei</option>
-                            <option value="Spalle">Spalle</option>
-                            <option value="Braccia">Braccia (Bicipiti/Tricipiti)</option>
+                            <option value="Schiena">Dorsali (Larghezza/Spessore)</option>
+                            <option value="Gambe">Gambe e Glutei</option>
+                            <option value="Spalle">Deltoidi</option>
+                            <option value="Braccia">Bicipiti e Tricipiti</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">SINCRONIZZA E GENERA</button>
+                <button onclick="saveProfileData()" class="glow-btn">SALVA E GENERA PROTOCOLLO</button>
             </div>
         </section>
 
-        <section id="workout-gen" class="screen hidden">
-            <div id="workout-display"></div>
-        </section>
+        <section id="workout-gen" class="screen hidden"></section>
 
         <section id="dash" class="screen hidden">
-            <div class="glass-card stat-box">
-                <h3>Volume Totale Sollevato</h3>
+            <div class="glass-card">
+                <h3>Volume di Lavoro Totale</h3>
                 <div class="big-val" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>
