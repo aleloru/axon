@@ -1,5 +1,5 @@
-const SUPABASE_URL = "INSERISCI_URL_QUI";
-const SUPABASE_KEY = "INSERISCI_KEY_QUI";
+const SUPABASE_URL = "https://eckwueoihttjhygmeifo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_UAJR8pVZKF4CRjl2-URAcQ_Z3tRg3M3";
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESERCIZI_DB = [
