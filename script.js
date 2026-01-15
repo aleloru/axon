@@ -4,18 +4,13 @@ const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ESERCIZI_DB = [
     { nome: "Panca Piana", muscoli: ["Petto"], sports: ["palestra", "combat"] },
-    { nome: "Squat Bilanciere", muscoli: ["Gambe"], sports: ["palestra", "calcio", "combat"] },
-    { nome: "Stacco Terra", muscoli: ["Schiena"], sports: ["palestra", "combat"] },
-    { nome: "Trazioni Sbarra", muscoli: ["Schiena"], sports: ["palestra", "tennis", "combat"] },
+    { nome: "Squat", muscoli: ["Gambe"], sports: ["palestra", "calcio", "combat"] },
+    { nome: "Trazioni", muscoli: ["Schiena"], sports: ["palestra", "combat"] },
     { nome: "Military Press", muscoli: ["Spalle"], sports: ["palestra", "tennis"] },
-    { nome: "Affondi", muscoli: ["Gambe"], sports: ["calcio", "corsa", "palestra"] },
-    { nome: "Box Jump", muscoli: ["Gambe"], sports: ["calcio", "combat"] },
-    { nome: "Curls", muscoli: ["Braccia"], sports: ["palestra"] }
+    { nome: "Curls", muscoli: ["Braccia"], sports: ["palestra"] },
+    { nome: "Box Jump", muscoli: ["Gambe"], sports: ["calcio", "combat"] }
 ];
 
-const GRUPPI = ["Petto", "Schiena", "Gambe", "Spalle", "Braccia"];
-
-// Navigazione intelligente
 function nav(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
@@ -23,90 +18,56 @@ function nav(id) {
     if(id === 'dash') updateDash();
 }
 
-// Controllo se l'utente ha già un profilo salvato
-async function checkExistingProfile() {
-    const { data: { user } } = await _sb.auth.getUser();
-    const { data: p } = await _sb.from('profiles').select('*').eq('id', user.id).single();
-
-    if (p && p.training_days) {
-        nav('workout-gen'); // Vai diretto alla scheda
-    } else {
-        nav('profile-setup'); // Chiedi configurazione
-    }
-}
-
 async function saveProfileData() {
     const { data: { user } } = await _sb.auth.getUser();
     const profile = {
         id: user.id,
         training_days: parseInt(document.getElementById('f-days').value),
-        session_duration: 90,
-        experience_level: "intermediate",
-        goal: "ipertrofia",
         weak_point: document.getElementById('f-weak').value,
         sport: document.getElementById('f-sport').value,
         weeks_duration: parseInt(document.getElementById('f-weeks').value),
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString() // Assicurati di aver lanciato il comando SQL al punto 1!
     };
 
     const { error } = await _sb.from('profiles').upsert(profile);
-    if (error) alert("Errore Salvataggio: " + error.message);
-    else nav('workout-gen');
+    if (error) {
+        console.error(error);
+        alert("Errore: " + error.message);
+    } else {
+        nav('workout-gen');
+    }
 }
 
 async function generateNeuralWorkout() {
     const { data: { user } } = await _sb.auth.getUser();
-    const { data: p, error } = await _sb.from('profiles').select('*').eq('id', user.id).single();
-    
-    if (error || !p) return nav('profile-setup');
+    const { data: p } = await _sb.from('profiles').select('*').eq('id', user.id).single();
+    if (!p) return nav('profile-setup');
 
-    const userSport = p.sport || "palestra";
     const dataFine = new Date(p.created_at || new Date());
     dataFine.setDate(dataFine.getDate() + (p.weeks_duration * 7));
 
     let container = document.getElementById('workout-gen');
-    container.innerHTML = `
-        <div class="glass-card">
-            <h1>PROTOCOLLO ${userSport.toUpperCase()}</h1>
-            <p>Focus: <strong>${p.weak_point}</strong> | Scadenza: <strong>${dataFine.toLocaleDateString()}</strong></p>
-        </div>`;
+    container.innerHTML = `<div class="glass-card"><h1>PROTOCOLLO ${p.sport.toUpperCase()}</h1><p>Fine ciclo: ${dataFine.toLocaleDateString()}</p></div>`;
 
     for (let d = 1; d <= p.training_days; d++) {
-        container.innerHTML += generateDay(p, d, userSport);
+        let esGiorno = ESERCIZI_DB.sort(() => 0.5 - Math.random()).slice(0, 5);
+        let html = `<div class="glass-card"><h3>Giorno ${d}</h3><table class="workout-table">`;
+        esGiorno.forEach((ex, i) => {
+            html += `<tr class="${ex.muscoli.includes(p.weak_point) ? 'weak-point-row' : ''}">
+                <td>${ex.nome}</td><td><input type="number" id="kg-${d}-${i}" style="width:50px"></td>
+                <td><button onclick="saveLog('${ex.muscoli[0]}','${ex.nome}',3,10,'kg-${d}-${i}')" class="glow-btn" style="padding:4px">LOG</button></td>
+            </tr>`;
+        });
+        container.innerHTML += html + `</table></div>`;
     }
-}
-
-function generateDay(p, dayNum, userSport) {
-    let sessione = [];
-    let esSport = ESERCIZI_DB.filter(ex => ex.sports.includes(userSport));
-    sessione.push(...esSport.sort(() => 0.5 - Math.random()).slice(0, 2));
-
-    let esCarente = ESERCIZI_DB.filter(ex => ex.muscoli.includes(p.weak_point));
-    sessione.push(...esCarente.sort(() => 0.5 - Math.random()).slice(0, 2));
-
-    let altro = GRUPPI[dayNum % GRUPPI.length];
-    let esAltro = ESERCIZI_DB.filter(ex => ex.muscoli.includes(altro));
-    sessione.push(...esAltro.slice(0, 2));
-
-    let selezione = Array.from(new Set(sessione)).slice(0, 6);
-
-    let html = `<div class="glass-card"><h3>GIORNO ${dayNum}</h3><table class="workout-table"><tbody>`;
-    selezione.forEach((ex, i) => {
-        html += `<tr class="${ex.muscoli.includes(p.weak_point) ? 'weak-point-row' : ''}">
-            <td><strong>${ex.nome}</strong> <span class="tag">${ex.muscoli[0]}</span></td>
-            <td><input type="number" id="kg-${dayNum}-${i}" style="width:50px" placeholder="kg"></td>
-            <td><button onclick="saveLog('${ex.muscoli[0]}','${ex.nome}',3,10,'kg-${dayNum}-${i}')" class="glow-btn" style="padding:5px; width:auto">LOG</button></td>
-        </tr>`;
-    });
-    return html + "</tbody></table></div>";
 }
 
 async function saveLog(g, n, s, r, id) {
     const val = document.getElementById(id).value;
-    if(!val) return alert("Inserisci il peso!");
+    if(!val) return alert("Metti i kg!");
     const { data: { user } } = await _sb.auth.getUser();
     await _sb.from('workout_logs').insert({ user_id: user.id, muscle_group: g, exercise_name: n, weight_lifted: val, sets: s, reps_done: r });
-    alert("Dato salvato!");
+    alert("Salvato!");
 }
 
 async function updateDash() {
@@ -120,10 +81,9 @@ _sb.auth.onAuthStateChange((event, session) => {
     if (session) {
         document.getElementById('sidebar').classList.remove('hidden');
         document.getElementById('auth-screen').classList.add('hidden');
-        checkExistingProfile();
-    } else {
-        document.getElementById('sidebar').classList.add('hidden');
-        document.getElementById('auth-screen').classList.remove('hidden');
+        _sb.from('profiles').select('*').eq('id', session.user.id).single().then(({data}) => {
+            if(data) nav('workout-gen'); else nav('profile-setup');
+        });
     }
 });
 
