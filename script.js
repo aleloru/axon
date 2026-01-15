@@ -8,12 +8,25 @@ const ESERCIZI_DB = [
     { nome: "Trazioni", muscoli: ["Schiena"], sports: ["palestra", "combat"] },
     { nome: "Military Press", muscoli: ["Spalle"], sports: ["palestra", "tennis"] },
     { nome: "Curls", muscoli: ["Braccia"], sports: ["palestra"] },
-    { nome: "Box Jump", muscoli: ["Gambe"], sports: ["calcio", "combat"] }
+    { nome: "Box Jump", muscoli: ["Gambe"], sports: ["calcio", "combat"] },
+    { nome: "Affondi", muscoli: ["Gambe"], sports: ["calcio", "palestra"] },
+    { nome: "Rematore", muscoli: ["Schiena"], sports: ["palestra", "combat"] }
 ];
+
+function seededRandom(seed) {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
 
 function nav(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+    const target = document.getElementById(id);
+    target.classList.remove('hidden');
+    // Riavvia animazione
+    target.style.animation = 'none';
+    target.offsetHeight; 
+    target.style.animation = null;
+
     if(id === 'workout-gen') generateNeuralWorkout();
     if(id === 'dash') updateDash();
 }
@@ -29,6 +42,7 @@ async function saveProfileData() {
         created_at: new Date().toISOString()
     };
     await _sb.from('profiles').upsert(profile);
+    alert("Protocollo Inizializzato con successo!");
     nav('workout-gen');
 }
 
@@ -37,19 +51,25 @@ async function generateNeuralWorkout() {
     const { data: p } = await _sb.from('profiles').select('*').eq('id', user.id).single();
     if (!p) return nav('profile-setup');
 
-    // Recupera ultimi pesi sollevati
     const { data: logs } = await _sb.from('workout_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
 
     let container = document.getElementById('workout-gen');
-    container.innerHTML = `<div class="glass-card"><h1>PROTOCOLLO ${p.sport.toUpperCase()}</h1><p>Focus: ${p.weak_point}</p></div>`;
+    container.innerHTML = `<div class="glass-card"><h1>PIANO ${p.sport.toUpperCase()}</h1><p>Focus Attuale: ${p.weak_point}</p></div>`;
+
+    const userSeed = user.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
 
     for (let d = 1; d <= p.training_days; d++) {
-        let esGiorno = ESERCIZI_DB.sort(() => 0.5 - Math.random()).slice(0, 5);
+        let daySeed = userSeed + d;
+        // Filtriamo e ordiniamo in modo deterministico (fisso)
+        let esGiorno = [...ESERCIZI_DB]
+            .filter(ex => ex.sports.includes(p.sport) || ex.muscoli.includes(p.weak_point))
+            .sort((a, b) => seededRandom(daySeed + a.nome.charCodeAt(0)) - seededRandom(daySeed + b.nome.charCodeAt(0)))
+            .slice(0, 5);
+
         let html = `<div class="glass-card"><h3>Giorno ${d}</h3><table class="workout-table">`;
-        
         esGiorno.forEach((ex, i) => {
             const lastLog = logs?.find(l => l.exercise_name === ex.nome);
-            const hint = lastLog ? `Ultimo carico: ${lastLog.weight_lifted}kg` : "Suggerimento: Carico moderato (RPE 7)";
+            const hint = lastLog ? `Ultimo: ${lastLog.weight_lifted}kg` : "Inizia leggero";
 
             html += `<tr class="${ex.muscoli.includes(p.weak_point) ? 'weak-point-row' : ''}">
                 <td><strong>${ex.nome}</strong><br><span class="hint-text">${hint}</span></td>
@@ -63,13 +83,13 @@ async function generateNeuralWorkout() {
 
 async function saveLog(g, n, s, r, id) {
     const val = document.getElementById(id).value;
-    if(!val) return alert("Inserisci il peso!");
+    if(!val) return alert("Dati mancanti");
     const { data: { user } } = await _sb.auth.getUser();
     await _sb.from('workout_logs').insert({ 
         user_id: user.id, muscle_group: g, exercise_name: n, 
         weight_lifted: val, sets: s, reps_done: r, created_at: new Date().toISOString() 
     });
-    alert("Registrato!");
+    alert("Peso Registrato!");
     generateNeuralWorkout(); 
 }
 

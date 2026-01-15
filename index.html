@@ -9,10 +9,7 @@
 </head>
 <body>
     <nav id="sidebar" class="hidden">
-        <div class="sidebar-logo">
-            <div class="logo-box">A</div>
-            <span>AXON <strong>PRO</strong></span>
-        </div>
+        <div class="sidebar-logo"><div class="logo-box">A</div><span>AXON <strong>PRO</strong></span></div>
         <ul class="nav-items">
             <li onclick="nav('dash')">📊 Dashboard</li>
             <li onclick="nav('workout-gen')">🏋️ Protocollo</li>
@@ -22,19 +19,19 @@
     </nav>
 
     <main id="app-core">
-        <section id="auth-screen" class="screen">
+        <section id="auth-screen" class="screen animate-in">
             <div class="glass-card auth-card">
                 <div class="logo-box large">A</div>
-                <h1>Accedi</h1>
+                <h1>Inizializza Sistema</h1>
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="pass" placeholder="Password">
-                <button onclick="handleAuth()" class="glow-btn">ENTRA</button>
+                <button onclick="handleAuth()" class="glow-btn">ENTRA NEL CORE</button>
             </div>
         </section>
 
-        <section id="profile-setup" class="screen hidden">
+        <section id="profile-setup" class="screen hidden animate-in">
             <div class="glass-card">
-                <h2>Configurazione Piano</h2>
+                <h2>Parametri di Calcolo</h2>
                 <div class="form-grid">
                     <div class="input-group"><label>Giorni/Settimana</label><input type="number" id="f-days" value="3"></div>
                     <div class="input-group">
@@ -46,16 +43,7 @@
                             <option value="combat">Combat Sports</option>
                         </select>
                     </div>
-                    <div class="input-group">
-                        <label>Durata (Settimane)</label>
-                        <select id="f-weeks">
-                            <option value="4">4 Settimane</option>
-                            <option value="6" selected>6 Settimane</option>
-                            <option value="8">8 Settimane</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Punto Carente</label>
+                    <div class="input-group"><label>Punto Carente</label>
                         <select id="f-weak">
                             <option value="Petto">Pettorali</option>
                             <option value="Schiena">Schiena</option>
@@ -64,16 +52,18 @@
                             <option value="Braccia">Braccia</option>
                         </select>
                     </div>
+                    <div class="input-group"><label>Settimane Ciclo</label><input type="number" id="f-weeks" value="6"></div>
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">SALVA E GENERA</button>
+                <button onclick="saveProfileData()" class="glow-btn">AGGIORNA E SALVA PROTOCOLLO</button>
+                <p style="text-align:center; font-size:0.8rem; color:#64748b; margin-top:15px;">Salvare i dati manterrà gli esercizi fissi per tutta la durata del ciclo.</p>
             </div>
         </section>
 
-        <section id="workout-gen" class="screen hidden"></section>
+        <section id="workout-gen" class="screen hidden animate-in"></section>
         
-        <section id="dash" class="screen hidden">
+        <section id="dash" class="screen hidden animate-in">
             <div class="glass-card">
-                <h3>Volume Totale</h3>
+                <h3>Neural Load (Volume)</h3>
                 <div class="big-val" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>
