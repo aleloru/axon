@@ -3,86 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXON PRO | Neural OS</title>
+    <title>AXON PRO | Neural OS v3</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <nav id="sidebar" class="hidden">
         <div class="sidebar-logo"><div class="logo-box">A</div><span>AXON <strong>PRO</strong></span></div>
         <ul class="nav-items">
-            <li onclick="nav('dash')">📊 Dashboard</li>
-            <li onclick="nav('workout-gen')">🏋️ Protocollo</li>
-            <li onclick="nav('profile-setup')">⚙️ Impostazioni</li>
+            <li onclick="nav('dash')">📊 DASHBOARD</li>
+            <li onclick="nav('workout-gen')">🏋️ PROTOCOLLO</li>
+            <li onclick="nav('profile-setup')">⚙️ BIO-SETTINGS</li>
         </ul>
         <button onclick="logout()" class="btn-exit">DISCONNETTI</button>
     </nav>
 
     <main id="app-core">
-        <section id="auth-screen" class="screen animate-in">
-            <div class="auth-container">
-                <div class="glass-card auth-card">
-                    <div class="logo-box large">A</div>
-                    <h1>Neural Access</h1>
-                    <p class="subtitle">Inserisci le credenziali per sincronizzare il tuo DNA atletico.</p>
-                    <div class="input-group-auth">
-                        <input type="email" id="email" placeholder="Email">
-                        <input type="password" id="pass" placeholder="Password">
-                    </div>
-                    <button onclick="handleAuth()" class="glow-btn">ACCEDI / REGISTRATI</button>
-                    <p class="auth-footer">Se non hai un account, verrà creato automaticamente.</p>
+        <section id="auth-screen" class="screen">
+            <div class="auth-box animate-in">
+                <div class="logo-glow">A</div>
+                <h1 class="glitch-text">NEURAL ACCESS</h1>
+                <p>Inserisci credenziali per la scansione biometrica.</p>
+                <div class="input-field">
+                    <input type="email" id="email" placeholder=" " required>
+                    <label>Email ID</label>
                 </div>
+                <div class="input-field">
+                    <input type="password" id="pass" placeholder=" " required>
+                    <label>Access Code</label>
+                </div>
+                <button onclick="handleAuth()" class="neon-btn">INITIALIZE</button>
+                <div class="auth-meta">Nuovo utente? L'account verrà creato al primo accesso.</div>
             </div>
         </section>
 
-        <section id="profile-setup" class="screen hidden animate-in">
-            <div class="setup-container">
-                <div class="glass-card">
-                    <div class="card-header">
-                        <h2>Sincronizzazione Atleta</h2>
-                        <span class="badge">Configurazione Iniziale</span>
-                    </div>
-                    <p>Compila il questionario per permettere all'AI di generare il tuo protocollo di allenamento fisso.</p>
-                    
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label>Frequenza Settimanale</label>
-                            <input type="number" id="f-days" value="3" min="1" max="7">
-                        </div>
-                        <div class="input-group">
-                            <label>Disciplina Target</label>
-                            <select id="f-sport">
-                                <option value="palestra">Bodybuilding Classico</option>
-                                <option value="calcio">Calcio / Esplosività</option>
-                                <option value="tennis">Tennis / Agilità</option>
-                                <option value="combat">Combat / Potenza</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Focus Carente (Debolezza)</label>
-                            <select id="f-weak">
-                                <option value="Petto">Pettorali</option>
-                                <option value="Schiena">Schiena</option>
-                                <option value="Gambe">Gambe</option>
-                                <option value="Spalle">Spalle</option>
-                                <option value="Braccia">Braccia</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Durata Protocollo (Settimane)</label>
-                            <input type="number" id="f-weeks" value="6">
-                        </div>
-                    </div>
-                    <button onclick="saveProfileData()" class="glow-btn">GENERA IL MIO PROTOCOLLO</button>
+        <section id="profile-setup" class="screen hidden">
+            <div class="setup-card animate-in">
+                <div class="setup-header">
+                    <h2>ANALISI ATLETA</h2>
+                    <p>Configura il tuo profilo per l'algoritmo AXON.</p>
                 </div>
+                <div class="setup-grid">
+                    <div class="bio-group">
+                        <label>Disciplina Sportiva</label>
+                        <select id="f-sport">
+                            <option value="palestra">Solo Palestra</option>
+                            <option value="calcio">Calcio / Esplosività</option>
+                            <option value="tennis">Tennis / Reattività</option>
+                            <option value="combat">Combat / Potenza</option>
+                        </select>
+                    </div>
+                    <div class="bio-group">
+                        <label>Punto Carente (Focus)</label>
+                        <select id="f-weak">
+                            <option value="Petto">Pettorali</option>
+                            <option value="Schiena">Schiena</option>
+                            <option value="Gambe">Gambe</option>
+                            <option value="Spalle">Spalle</option>
+                            <option value="Braccia">Braccia</option>
+                        </select>
+                    </div>
+                    <div class="bio-group">
+                        <label>Frequenza (Giorni/Sett)</label>
+                        <input type="number" id="f-days" value="3" min="1" max="7">
+                    </div>
+                    <div class="bio-group">
+                        <label>Durata Ciclo (Settimane)</label>
+                        <input type="number" id="f-weeks" value="6">
+                    </div>
+                </div>
+                <button onclick="saveProfileData()" class="neon-btn gold">GENERA PROTOCOLLO FISSO</button>
             </div>
         </section>
 
-        <section id="workout-gen" class="screen hidden animate-in"></section>
-        
-        <section id="dash" class="screen hidden animate-in">
+        <section id="workout-gen" class="screen hidden"></section>
+        <section id="dash" class="screen hidden">
             <div class="glass-card">
-                <h3>Neural Load (Volume Totale)</h3>
+                <h3>VOLUME TOTALE CARICATO</h3>
                 <div class="big-val" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>

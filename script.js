@@ -7,11 +7,11 @@ const ESERCIZI_DB = [
     { nome: "Squat", muscoli: ["Gambe"], sports: ["palestra", "calcio", "combat"] },
     { nome: "Trazioni Sbarra", muscoli: ["Schiena"], sports: ["palestra", "combat"] },
     { nome: "Military Press", muscoli: ["Spalle"], sports: ["palestra", "tennis"] },
-    { nome: "Dips", muscoli: ["Petto", "Braccia"], sports: ["palestra", "combat"] },
-    { nome: "Affondi Bulcari", muscoli: ["Gambe"], sports: ["calcio", "palestra"] },
-    { nome: "Rematore Manubrio", muscoli: ["Schiena"], sports: ["palestra", "combat"] }
+    { nome: "Affondi", muscoli: ["Gambe"], sports: ["calcio", "palestra"] },
+    { nome: "Hammer Curl", muscoli: ["Braccia"], sports: ["palestra"] }
 ];
 
+// Seeded random per generare sempre la stessa scheda per lo stesso utente
 function seededRandom(seed) {
     const x = Math.sin(seed++) * 10000;
     return x - Math.floor(x);
@@ -19,8 +19,7 @@ function seededRandom(seed) {
 
 function nav(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    const target = document.getElementById(id);
-    target.classList.remove('hidden');
+    document.getElementById(id).classList.remove('hidden');
     if(id === 'workout-gen') generateNeuralWorkout();
     if(id === 'dash') updateDash();
 }
@@ -28,15 +27,14 @@ function nav(id) {
 async function handleAuth() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
-    if(!email || !pass) return alert("Inserisci dati validi");
+    if(!email || !pass) return alert("Inserisci credenziali.");
 
-    const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
-    
+    const { error } = await _sb.auth.signInWithPassword({ email, password: pass });
     if (error) {
-        // Se non esiste, prova a registrarlo
-        const { error: signUpErr } = await _sb.auth.signUp({ email, password: pass });
-        if(signUpErr) return alert("Errore: " + signUpErr.message);
-        alert("Account creato! Sincronizza ora il tuo profilo.");
+        // Se non esiste, lo registra
+        const { error: regErr } = await _sb.auth.signUp({ email, password: pass });
+        if(regErr) return alert("Errore Registrazione: " + regErr.message);
+        alert("Account creato. Completa l'analisi biometrica.");
     }
 }
 
@@ -50,8 +48,8 @@ async function saveProfileData() {
         weeks_duration: parseInt(document.getElementById('f-weeks').value),
         created_at: new Date().toISOString()
     };
-    const { error } = await _sb.from('profiles').upsert(profile);
-    if (!error) nav('workout-gen');
+    await _sb.from('profiles').upsert(profile);
+    nav('workout-gen');
 }
 
 async function generateNeuralWorkout() {
@@ -63,7 +61,7 @@ async function generateNeuralWorkout() {
     const userSeed = user.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
 
     let container = document.getElementById('workout-gen');
-    container.innerHTML = `<div class="glass-card animate-in"><h2>PROTOCOLLO ${p.sport.toUpperCase()}</h2><p>Focus: ${p.weak_point}</p></div>`;
+    container.innerHTML = `<div class="glass-card animate-in"><h2>PROTOCOL: ${p.sport.toUpperCase()}</h2><p>Focus: ${p.weak_point}</p></div>`;
 
     for (let d = 1; d <= p.training_days; d++) {
         let daySeed = userSeed + d;
@@ -72,12 +70,14 @@ async function generateNeuralWorkout() {
             .sort((a, b) => seededRandom(daySeed + a.nome.charCodeAt(0)) - seededRandom(daySeed + b.nome.charCodeAt(0)))
             .slice(0, 5);
 
-        let html = `<div class="glass-card animate-in" style="animation-delay:${d*0.1}s"><h3>Giorno ${d}</h3><table class="workout-table">`;
+        let html = `<div class="glass-card animate-in"><h3>GIORNO ${d}</h3><table style="width:100%; border-collapse:collapse;">`;
         esGiorno.forEach((ex, i) => {
             const lastLog = logs?.find(l => l.exercise_name === ex.nome);
-            html += `<tr><td><strong>${ex.nome}</strong><br><small>${lastLog ? 'Ultimo: '+lastLog.weight_lifted+'kg' : 'Inizia leggero'}</small></td>
-            <td><input type="number" id="kg-${d}-${i}" class="kg-input" style="width:60px" placeholder="kg"></td>
-            <td><button onclick="saveLog('${ex.muscoli[0]}','${ex.nome}',3,10,'kg-${d}-${i}')" class="glow-btn" style="padding:5px 10px; font-size:0.7rem">LOG</button></td></tr>`;
+            html += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding:15px 0;"><strong>${ex.nome}</strong><br><small style="color:#64748b">${lastLog ? 'Ultimo: '+lastLog.weight_lifted+'kg' : 'RPE 7 Start'}</small></td>
+                <td><input type="number" id="kg-${d}-${i}" style="width:50px; background:#000; border:1px solid var(--neon-cyan); color:#fff; padding:5px; border-radius:4px;"></td>
+                <td style="text-align:right"><button onclick="saveLog('${ex.muscoli[0]}','${ex.nome}',3,10,'kg-${d}-${i}')" class="neon-btn" style="padding:5px 10px; font-size:0.6rem; width:auto;">LOG</button></td>
+            </tr>`;
         });
         container.innerHTML += html + `</table></div>`;
     }
@@ -88,7 +88,7 @@ async function saveLog(g, n, s, r, id) {
     if(!val) return;
     const { data: { user } } = await _sb.auth.getUser();
     await _sb.from('workout_logs').insert({ user_id: user.id, muscle_group: g, exercise_name: n, weight_lifted: val, sets: s, reps_done: r, created_at: new Date().toISOString() });
-    alert("Dato salvato.");
+    alert("Dato Archiviato.");
     generateNeuralWorkout();
 }
 
@@ -97,13 +97,13 @@ _sb.auth.onAuthStateChange((event, session) => {
         document.getElementById('sidebar').classList.remove('hidden');
         document.getElementById('auth-screen').classList.add('hidden');
         _sb.from('profiles').select('*').eq('id', session.user.id).single().then(({data}) => {
-            if(data && data.training_days) nav('workout-gen'); else nav('profile-setup');
+            if(data && data.training_days) nav('workout-gen'); 
+            else nav('profile-setup');
         });
     }
 });
 
 async function logout() { await _sb.auth.signOut(); location.reload(); }
-
 async function updateDash() {
     const { data: { user } } = await _sb.auth.getUser();
     const { data } = await _sb.from('workout_logs').select('*').eq('user_id', user.id);
