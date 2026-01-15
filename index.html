@@ -27,7 +27,6 @@
             <div class="glass-card auth-card">
                 <div class="logo-box large">A</div>
                 <h1>Accedi al Sistema</h1>
-                <p>Inserisci le credenziali per inizializzare il core.</p>
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="pass" placeholder="Password">
                 <button onclick="handleAuth()" class="glow-btn">INIZIALIZZA</button>
@@ -38,35 +37,34 @@
             <div class="glass-card">
                 <h2>Asset Atleta</h2>
                 <div class="form-grid">
-                    <div class="input-group"><label>Giorni di allenamento</label><input type="number" id="f-days" value="4" min="1" max="7"></div>
-                    <div class="input-group"><label>Minuti per sessione</label><input type="number" id="f-duration" value="90"></div>
+                    <div class="input-group"><label>Giorni/Settimana</label><input type="number" id="f-days" value="4"></div>
+                    <div class="input-group"><label>Minuti/Sessione</label><input type="number" id="f-duration" value="90"></div>
+                    <div class="input-group">
+                        <label>Disciplina Sportiva</label>
+                        <select id="f-sport">
+                            <option value="palestra" selected>Solo Palestra</option>
+                            <option value="calcio">Calcio</option>
+                            <option value="tennis">Tennis</option>
+                            <option value="combat">Combat Sports</option>
+                            <option value="corsa">Corsa</option>
+                        </select>
+                    </div>
                     <div class="input-group">
                         <label>Esperienza</label>
                         <select id="f-exp">
                             <option value="beginner">Principiante</option>
                             <option value="intermediate" selected>Intermedio</option>
-                            <option value="advanced">Avanzato</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Disciplina Sportiva</label>
-                        <select id="f-sport">
-                            <option value="gym" selected>Palestra (Puro Bodybuilding)</option>
-                            <option value="calcio">Calcio (Esplosività)</option>
-                            <option value="tennis">Tennis (Agilità/Core)</option>
-                            <option value="combat">Combat Sports (Potenza)</option>
-                            <option value="corsa">Corsa (Resistenza)</option>
                         </select>
                     </div>
                     <div class="input-group">
                         <label>Obiettivo</label>
                         <select id="f-goal">
-                            <option value="ipertrofia">Massa Muscolare</option>
-                            <option value="forza">Forza Massima</option>
+                            <option value="ipertrofia">Massa</option>
+                            <option value="forza">Forza</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Punto Carente (Focus)</label>
+                        <label>Punto Carente</label>
                         <select id="f-weak">
                             <option value="Petto">Pettorali</option>
                             <option value="Schiena">Schiena</option>
@@ -76,15 +74,14 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">GENERA PROTOCOLLO INTELLIGENTE</button>
+                <button onclick="saveProfileData()" class="glow-btn">GENERA PROTOCOLLO</button>
             </div>
         </section>
 
         <section id="workout-gen" class="screen hidden"></section>
-
         <section id="dash" class="screen hidden">
             <div class="glass-card">
-                <h3>Neural Load Totale (Volume)</h3>
+                <h3>Neural Load Totale</h3>
                 <div class="big-val" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>
