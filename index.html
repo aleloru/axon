@@ -20,42 +20,61 @@
 
     <main id="app-core">
         <section id="auth-screen" class="screen animate-in">
-            <div class="glass-card auth-card">
-                <div class="logo-box large">A</div>
-                <h1>Inizializza Sistema</h1>
-                <input type="email" id="email" placeholder="Email">
-                <input type="password" id="pass" placeholder="Password">
-                <button onclick="handleAuth()" class="glow-btn">ENTRA NEL CORE</button>
+            <div class="auth-container">
+                <div class="glass-card auth-card">
+                    <div class="logo-box large">A</div>
+                    <h1>Neural Access</h1>
+                    <p class="subtitle">Inserisci le credenziali per sincronizzare il tuo DNA atletico.</p>
+                    <div class="input-group-auth">
+                        <input type="email" id="email" placeholder="Email">
+                        <input type="password" id="pass" placeholder="Password">
+                    </div>
+                    <button onclick="handleAuth()" class="glow-btn">ACCEDI / REGISTRATI</button>
+                    <p class="auth-footer">Se non hai un account, verrà creato automaticamente.</p>
+                </div>
             </div>
         </section>
 
         <section id="profile-setup" class="screen hidden animate-in">
-            <div class="glass-card">
-                <h2>Parametri di Calcolo</h2>
-                <div class="form-grid">
-                    <div class="input-group"><label>Giorni/Settimana</label><input type="number" id="f-days" value="3"></div>
-                    <div class="input-group">
-                        <label>Disciplina</label>
-                        <select id="f-sport">
-                            <option value="palestra">Palestra</option>
-                            <option value="calcio">Calcio</option>
-                            <option value="tennis">Tennis</option>
-                            <option value="combat">Combat Sports</option>
-                        </select>
+            <div class="setup-container">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <h2>Sincronizzazione Atleta</h2>
+                        <span class="badge">Configurazione Iniziale</span>
                     </div>
-                    <div class="input-group"><label>Punto Carente</label>
-                        <select id="f-weak">
-                            <option value="Petto">Pettorali</option>
-                            <option value="Schiena">Schiena</option>
-                            <option value="Gambe">Gambe</option>
-                            <option value="Spalle">Spalle</option>
-                            <option value="Braccia">Braccia</option>
-                        </select>
+                    <p>Compila il questionario per permettere all'AI di generare il tuo protocollo di allenamento fisso.</p>
+                    
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Frequenza Settimanale</label>
+                            <input type="number" id="f-days" value="3" min="1" max="7">
+                        </div>
+                        <div class="input-group">
+                            <label>Disciplina Target</label>
+                            <select id="f-sport">
+                                <option value="palestra">Bodybuilding Classico</option>
+                                <option value="calcio">Calcio / Esplosività</option>
+                                <option value="tennis">Tennis / Agilità</option>
+                                <option value="combat">Combat / Potenza</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Focus Carente (Debolezza)</label>
+                            <select id="f-weak">
+                                <option value="Petto">Pettorali</option>
+                                <option value="Schiena">Schiena</option>
+                                <option value="Gambe">Gambe</option>
+                                <option value="Spalle">Spalle</option>
+                                <option value="Braccia">Braccia</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Durata Protocollo (Settimane)</label>
+                            <input type="number" id="f-weeks" value="6">
+                        </div>
                     </div>
-                    <div class="input-group"><label>Settimane Ciclo</label><input type="number" id="f-weeks" value="6"></div>
+                    <button onclick="saveProfileData()" class="glow-btn">GENERA IL MIO PROTOCOLLO</button>
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">AGGIORNA E SALVA PROTOCOLLO</button>
-                <p style="text-align:center; font-size:0.8rem; color:#64748b; margin-top:15px;">Salvare i dati manterrà gli esercizi fissi per tutta la durata del ciclo.</p>
             </div>
         </section>
 
@@ -63,7 +82,7 @@
         
         <section id="dash" class="screen hidden animate-in">
             <div class="glass-card">
-                <h3>Neural Load (Volume)</h3>
+                <h3>Neural Load (Volume Totale)</h3>
                 <div class="big-val" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>
