@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXON | Neural OS v3</title>
+    <title>AXON PRO | Neural OS v3</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
 </head>
@@ -17,7 +17,7 @@
         <ul class="nav-items">
             <li onclick="nav('dash')">📊 Dashboard Analitica</li>
             <li onclick="nav('profile-setup')">⚙️ Configurazione Biometrica</li>
-            <li onclick="nav('workout-gen')">🏋️ Generatore Protocolli</li>
+            <li onclick="nav('workout-gen')">🏋️ Protocollo Settimanale</li>
         </ul>
         <button onclick="logout()" class="btn-exit">DISCONNETTI</button>
     </nav>
@@ -29,18 +29,18 @@
                 <h1>Accedi al Sistema</h1>
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="pass" placeholder="Password">
-                <button onclick="handleAuth()" class="glow-btn">INIZIALIZZA</button>
+                <button onclick="handleAuth()" class="glow-btn">INIZIALIZZA NEURAL CORE</button>
             </div>
         </section>
 
         <section id="profile-setup" class="screen hidden">
             <div class="glass-card">
-                <h2>Parametri Atleta</h2>
+                <h2>Asset Atleta</h2>
                 <div class="form-grid">
-                    <div class="input-group"><label>Allenamenti a settimana</label><input type="number" id="f-days" value="4"></div>
-                    <div class="input-group"><label>Minuti disponibili/sessione</label><input type="number" id="f-duration" value="90"></div>
+                    <div class="input-group"><label>Frequenza (Giorni/Settimana)</label><input type="number" id="f-days" value="4" min="1" max="7"></div>
+                    <div class="input-group"><label>Durata Sessione (Minuti)</label><input type="number" id="f-duration" value="90"></div>
                     <div class="input-group">
-                        <label>Livello Esperienza</label>
+                        <label>Esperienza</label>
                         <select id="f-exp">
                             <option value="beginner">Principiante</option>
                             <option value="intermediate" selected>Intermedio</option>
@@ -48,24 +48,24 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Obiettivo Dominante</label>
+                        <label>Obiettivo</label>
                         <select id="f-goal">
-                            <option value="ipertrofia">Ipertrofia (Massa)</option>
+                            <option value="ipertrofia">Massa (Ipertrofia)</option>
                             <option value="forza">Forza Massima</option>
                         </select>
                     </div>
                     <div class="input-group full-width">
-                        <label>Focus Gruppo Carente</label>
+                        <label>Focus Punto Carente (Priorità Neurale)</label>
                         <select id="f-weak">
                             <option value="Petto">Pettorali</option>
-                            <option value="Schiena">Dorsali (Larghezza/Spessore)</option>
+                            <option value="Schiena">Schiena (Dorsali)</option>
                             <option value="Gambe">Gambe e Glutei</option>
-                            <option value="Spalle">Deltoidi</option>
-                            <option value="Braccia">Bicipiti e Tricipiti</option>
+                            <option value="Spalle">Spalle</option>
+                            <option value="Braccia">Braccia</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">SALVA E GENERA PROTOCOLLO</button>
+                <button onclick="saveProfileData()" class="glow-btn">GENERA PROTOCOLLO COMPLETO</button>
             </div>
         </section>
 
@@ -73,7 +73,7 @@
 
         <section id="dash" class="screen hidden">
             <div class="glass-card">
-                <h3>Volume di Lavoro Totale</h3>
+                <h3>Volume di Lavoro Totale (Neural Load)</h3>
                 <div class="big-val" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>
