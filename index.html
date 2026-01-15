@@ -9,7 +9,10 @@
 </head>
 <body>
     <nav id="sidebar" class="hidden">
-        <div class="sidebar-logo"><div class="logo-box">A</div><span>AXON <strong>PRO</strong></span></div>
+        <div class="sidebar-logo">
+            <div class="logo-box">A</div>
+            <span>AXON <strong>PRO</strong></span>
+        </div>
         <ul class="nav-items">
             <li onclick="nav('dash')">📊 Dashboard</li>
             <li onclick="nav('workout-gen')">🏋️ Protocollo</li>
@@ -23,8 +26,8 @@
             <div class="glass-card auth-card">
                 <div class="logo-box large">A</div>
                 <h1>Accedi</h1>
-                <input type="email" id="email" placeholder="Email"><br>
-                <input type="password" id="pass" placeholder="Password"><br>
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="pass" placeholder="Password">
                 <button onclick="handleAuth()" class="glow-btn">ENTRA</button>
             </div>
         </section>
@@ -62,13 +65,17 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">SALVA E GENERA SCHEDA</button>
+                <button onclick="saveProfileData()" class="glow-btn">SALVA E GENERA</button>
             </div>
         </section>
 
         <section id="workout-gen" class="screen hidden"></section>
+        
         <section id="dash" class="screen hidden">
-            <div class="glass-card"><h3>Volume Totale</h3><div class="big-val" id="total-volume">0 <small>kg</small></div></div>
+            <div class="glass-card">
+                <h3>Volume Totale</h3>
+                <div class="big-val" id="total-volume">0 <small>kg</small></div>
+            </div>
         </section>
     </main>
 
