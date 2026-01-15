@@ -3,85 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXON PRO | Neural OS v3</title>
+    <title>AXON PRO | Neural OS</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <nav id="sidebar" class="hidden">
-        <div class="sidebar-logo"><div class="logo-box">A</div><span>AXON <strong>PRO</strong></span></div>
+        <div class="sidebar-logo">AXON <strong>PRO</strong></div>
         <ul class="nav-items">
-            <li onclick="nav('dash')">📊 DASHBOARD</li>
-            <li onclick="nav('workout-gen')">🏋️ PROTOCOLLO</li>
-            <li onclick="nav('profile-setup')">⚙️ BIO-SETTINGS</li>
+            <li onclick="nav('dash')">📊 Dashboard</li>
+            <li onclick="nav('workout-gen')">🏋️ Protocollo</li>
+            <li onclick="nav('profile-setup')">⚙️ Impostazioni</li>
         </ul>
-        <button onclick="logout()" class="btn-exit">DISCONNETTI</button>
+        <button onclick="logout()" class="btn-exit">LOGOUT</button>
     </nav>
 
     <main id="app-core">
         <section id="auth-screen" class="screen">
-            <div class="auth-box animate-in">
-                <div class="logo-glow">A</div>
-                <h1 class="glitch-text">NEURAL ACCESS</h1>
-                <p>Inserisci credenziali per la scansione biometrica.</p>
-                <div class="input-field">
-                    <input type="email" id="email" placeholder=" " required>
-                    <label>Email ID</label>
+            <div class="auth-card">
+                <div class="auth-toggle">
+                    <button id="tgl-login" class="active" onclick="toggleAuthMode('login')">LOGIN</button>
+                    <button id="tgl-reg" onclick="toggleAuthMode('reg')">REGISTRATI</button>
                 </div>
-                <div class="input-field">
-                    <input type="password" id="pass" placeholder=" " required>
-                    <label>Access Code</label>
+                
+                <div id="auth-form">
+                    <h2 id="auth-title">Bentornato</h2>
+                    <input type="email" id="email" placeholder="Email">
+                    <input type="password" id="pass" placeholder="Password">
+                    <button onclick="handleAuth()" class="main-btn" id="btn-auth">ACCEDI</button>
                 </div>
-                <button onclick="handleAuth()" class="neon-btn">INITIALIZE</button>
-                <div class="auth-meta">Nuovo utente? L'account verrà creato al primo accesso.</div>
             </div>
         </section>
 
         <section id="profile-setup" class="screen hidden">
-            <div class="setup-card animate-in">
-                <div class="setup-header">
-                    <h2>ANALISI ATLETA</h2>
-                    <p>Configura il tuo profilo per l'algoritmo AXON.</p>
-                </div>
+            <div class="glass-panel">
+                <h2>Analisi Biometrica Atleta</h2>
                 <div class="setup-grid">
-                    <div class="bio-group">
-                        <label>Disciplina Sportiva</label>
+                    <div class="input-box"><label>Giorni Allenamento</label><input type="number" id="f-days" value="3"></div>
+                    <div class="input-box">
+                        <label>Disciplina</label>
                         <select id="f-sport">
-                            <option value="palestra">Solo Palestra</option>
-                            <option value="calcio">Calcio / Esplosività</option>
-                            <option value="tennis">Tennis / Reattività</option>
-                            <option value="combat">Combat / Potenza</option>
+                            <option value="palestra">Bodybuilding</option>
+                            <option value="calcio">Calcio / Sprint</option>
+                            <option value="combat">Combat / MMA</option>
                         </select>
                     </div>
-                    <div class="bio-group">
-                        <label>Punto Carente (Focus)</label>
+                    <div class="input-box">
+                        <label>Focus Carente</label>
                         <select id="f-weak">
-                            <option value="Petto">Pettorali</option>
-                            <option value="Schiena">Schiena</option>
-                            <option value="Gambe">Gambe</option>
-                            <option value="Spalle">Spalle</option>
-                            <option value="Braccia">Braccia</option>
+                            <option value="Petto">Petto</option><option value="Schiena">Schiena</option>
+                            <option value="Gambe">Gambe</option><option value="Spalle">Spalle</option>
                         </select>
                     </div>
-                    <div class="bio-group">
-                        <label>Frequenza (Giorni/Sett)</label>
-                        <input type="number" id="f-days" value="3" min="1" max="7">
-                    </div>
-                    <div class="bio-group">
-                        <label>Durata Ciclo (Settimane)</label>
-                        <input type="number" id="f-weeks" value="6">
-                    </div>
+                    <div class="input-box"><label>Durata (Settimane)</label><input type="number" id="f-weeks" value="6"></div>
                 </div>
-                <button onclick="saveProfileData()" class="neon-btn gold">GENERA PROTOCOLLO FISSO</button>
+                <button onclick="saveProfileData()" class="main-btn gold">SALVA E GENERA SCHEMA</button>
             </div>
         </section>
 
         <section id="workout-gen" class="screen hidden"></section>
         <section id="dash" class="screen hidden">
-            <div class="glass-card">
-                <h3>VOLUME TOTALE CARICATO</h3>
-                <div class="big-val" id="total-volume">0 <small>kg</small></div>
+            <div class="glass-panel">
+                <h3>VOLUME TOTALE</h3>
+                <div class="big-num" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>
     </main>
