@@ -1,22 +1,86 @@
-:root { --axon-cyan: #00d2ff; --bg: #020617; --card: rgba(15, 23, 42, 0.8); --border: #1e293b; --text: #f8fafc; }
-body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; }
-#sidebar { width: 280px; background: #000; border-right: 1px solid var(--border); height: 100vh; position: fixed; padding: 20px; box-sizing: border-box; }
-.logo-box { background: var(--axon-cyan); color: #000; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
-.logo-box.large { width: 70px; height: 70px; font-size: 2rem; margin: 0 auto 20px; box-shadow: 0 0 20px var(--axon-cyan); }
-.nav-items { list-style: none; padding: 30px 0; margin: 0; }
-.nav-items li { padding: 12px; margin-bottom: 5px; cursor: pointer; border-radius: 8px; color: #94a3b8; transition: 0.2s; }
-.nav-items li:hover { background: var(--card); color: var(--axon-cyan); }
-#app-core { margin-left: 280px; padding: 40px; width: 100%; }
-.glass-card { background: var(--card); border: 1px solid var(--border); padding: 30px; border-radius: 16px; backdrop-filter: blur(10px); }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 25px 0; }
-.full-width { grid-column: span 2; }
-input, select { background: #0f172a; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; }
-.glow-btn { background: var(--axon-cyan); color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-.workout-table { width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid var(--border); }
-.workout-table th { background: #1e293b; padding: 15px; text-align: left; color: var(--axon-cyan); }
-.workout-table td { padding: 15px; border-bottom: 1px solid var(--border); }
-.weak-point-row { border-left: 5px solid var(--axon-cyan); background: rgba(0, 210, 255, 0.05); }
-.tag { background: #334155; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; }
-.kg-input { width: 60px; text-align: center; }
-.hidden { display: none; }
-.big-val { font-size: 3.5rem; font-weight: 900; color: var(--axon-cyan); }
+:root {
+    --neon: #00f2ff;
+    --bg-dark: #050505;
+    --card-bg: #0f172a;
+    --text-main: #f1f5f9;
+    --accent: #1e293b;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+#sidebar {
+    width: 280px;
+    height: 100vh;
+    background: #000;
+    border-right: 1px solid var(--accent);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+}
+
+.axon-node {
+    width: 20px; height: 20px;
+    background: var(--neon);
+    box-shadow: 0 0 15px var(--neon);
+    margin-right: 10px;
+}
+
+.nav-link {
+    padding: 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #111;
+    transition: 0.3s;
+}
+
+.nav-link:hover { color: var(--neon); padding-left: 20px; }
+
+#main-view { margin-left: 280px; padding: 60px; }
+
+.auth-box {
+    max-width: 400px;
+    margin: 100px auto;
+    text-align: center;
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid var(--neon);
+}
+
+.main-btn {
+    background: var(--neon);
+    color: #000;
+    border: none;
+    padding: 18px 30px;
+    width: 100%;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+/* Workout Cards */
+.exercise-card {
+    background: var(--card-bg);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.exercise-card.priority {
+    border-left: 5px solid var(--neon);
+    background: linear-gradient(90deg, rgba(0,242,255,0.05) 0%, transparent 100%);
+}
+
+.stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
+.stat-value { font-size: 1.1rem; font-weight: 700; color: var(--neon); }

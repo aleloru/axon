@@ -2,51 +2,44 @@ const SUPABASE_URL = "https://eckwueoihttjhygmeifo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_UAJR8pVZKF4CRjl2-URAcQ_Z3tRg3M3";
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
-const ESERCIZI_DB = [
-    { nome: "Panca Piana Bilanciere", muscoli: ["Petto"], livelloMin: "beginner", obiettivo: ["forza", "ipertrofia"], intensita: 3, tipo: "base" },
-    { nome: "Panca Inclinata Manubri", muscoli: ["Petto"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 2, tipo: "base" },
-    { nome: "Dips Parallele (Zavorrate)", muscoli: ["Petto"], livelloMin: "intermediate", obiettivo: ["forza"], intensita: 3, tipo: "base" },
-    { nome: "Croci ai Cavi", muscoli: ["Petto"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 1, tipo: "isolamento" },
-    { nome: "Squat Bilanciere", muscoli: ["Gambe"], livelloMin: "beginner", obiettivo: ["forza", "ipertrofia"], intensita: 3, tipo: "base" },
-    { nome: "Hack Squat", muscoli: ["Gambe"], livelloMin: "intermediate", obiettivo: ["ipertrofia"], intensita: 3, tipo: "base" },
-    { nome: "Leg Press 45°", muscoli: ["Gambe"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 2, tipo: "base" },
-    { nome: "Stacco Rumeno", muscoli: ["Gambe"], livelloMin: "intermediate", obiettivo: ["forza", "ipertrofia"], intensita: 3, tipo: "base" },
-    { nome: "Leg Extension", muscoli: ["Gambe"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 1, tipo: "isolamento" },
-    { nome: "Trazioni alla Sbarra", muscoli: ["Schiena"], livelloMin: "intermediate", obiettivo: ["forza", "ipertrofia"], intensita: 3, tipo: "base" },
-    { nome: "Rematore Bilanciere", muscoli: ["Schiena"], livelloMin: "intermediate", obiettivo: ["forza", "ipertrofia"], intensita: 3, tipo: "base" },
-    { nome: "Lat Machine", muscoli: ["Schiena"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 2, tipo: "base" },
-    { nome: "Pulley Basso", muscoli: ["Schiena"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 2, tipo: "base" },
-    { nome: "Military Press", muscoli: ["Spalle"], livelloMin: "intermediate", obiettivo: ["forza"], intensita: 3, tipo: "base" },
-    { nome: "Alzate Laterali", muscoli: ["Spalle"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 1, tipo: "isolamento" },
-    { nome: "Facepull", muscoli: ["Spalle"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 1, tipo: "isolamento" },
-    { nome: "Curl Bilanciere EZ", muscoli: ["Braccia"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 2, tipo: "base" },
-    { nome: "Pushdown Tricipiti", muscoli: ["Braccia"], livelloMin: "beginner", obiettivo: ["ipertrofia"], intensita: 1, tipo: "isolamento" },
-    { nome: "French Press", muscoli: ["Braccia"], livelloMin: "intermediate", obiettivo: ["ipertrofia"], intensita: 2, tipo: "base" }
+const MASTER_DB = [
+    // PETTO (Spinta)
+    { id: 1, nome: "Panca Piana Bilanciere", muscolo: "Petto", tipo: "Power", lvl: 1, reps: "5-6" },
+    { id: 2, nome: "Panca Inclinata Manubri", muscolo: "Petto", tipo: "Hyper", lvl: 1, reps: "8-10" },
+    { id: 3, nome: "Dips Parallele (Zavorra)", muscolo: "Petto", tipo: "Power", lvl: 2, reps: "6-8" },
+    { id: 4, nome: "Croci ai Cavi 30°", muscolo: "Petto", tipo: "Pump", lvl: 1, reps: "12-15" },
+    { id: 5, nome: "Chest Press Hammer", muscolo: "Petto", tipo: "Hyper", lvl: 1, reps: "10-12" },
+    // SCHIENA (Tirata)
+    { id: 6, nome: "Stacco da Terra Classico", muscolo: "Schiena", tipo: "Power", lvl: 2, reps: "3-5" },
+    { id: 7, nome: "Trazioni Zavorrate", muscolo: "Schiena", tipo: "Power", lvl: 2, reps: "6-8" },
+    { id: 8, nome: "Rematore Bilanciere", muscolo: "Schiena", tipo: "Power", lvl: 1, reps: "8" },
+    { id: 9, nome: "Lat Machine Presa V", muscolo: "Schiena", tipo: "Hyper", lvl: 1, reps: "10-12" },
+    { id: 10, nome: "Pulley Basso Corda", muscolo: "Schiena", tipo: "Pump", lvl: 1, reps: "15" },
+    // GAMBE
+    { id: 11, nome: "Back Squat", muscolo: "Gambe", tipo: "Power", lvl: 1, reps: "5-6" },
+    { id: 12, nome: "Leg Press 45°", muscolo: "Gambe", tipo: "Hyper", lvl: 1, reps: "10-12" },
+    { id: 13, nome: "Hack Squat", muscolo: "Gambe", tipo: "Hyper", lvl: 2, reps: "8-10" },
+    { id: 14, nome: "Stacco Rumeno", muscolo: "Gambe", tipo: "Power", lvl: 2, reps: "8" },
+    { id: 15, nome: "Leg Extension (Peak)", muscolo: "Gambe", tipo: "Pump", lvl: 1, reps: "20" },
+    // SPALLE / BRACCIA
+    { id: 16, nome: "Military Press", muscolo: "Spalle", tipo: "Power", lvl: 1, reps: "6" },
+    { id: 17, nome: "Alzate Laterali Cavo", muscolo: "Spalle", tipo: "Pump", lvl: 1, reps: "15" },
+    { id: 18, nome: "Curl EZ Scott", muscolo: "Braccia", tipo: "Hyper", lvl: 1, reps: "10" },
+    { id: 19, nome: "French Press", muscolo: "Braccia", tipo: "Hyper", lvl: 2, reps: "10" }
 ];
 
-const LIVELLI = ["beginner", "intermediate", "advanced"];
-
+// Inizializzazione e Auth (Logica Standard Supabase)
 async function handleAuth() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
     const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
-    if (error) {
-        await _sb.auth.signUp({ email, password: pass });
-        alert("Account creato. Se è la prima volta, conferma l'email!");
-    } else location.reload();
-}
-
-function nav(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    if(id === 'workout-gen') generateNeuralWorkout();
-    if(id === 'dash') updateDash();
+    if (error) await _sb.auth.signUp({ email, password: pass });
+    location.reload();
 }
 
 async function saveProfileData() {
     const { data: { user } } = await _sb.auth.getUser();
-    const profile = {
+    const payload = {
         id: user.id,
         training_days: parseInt(document.getElementById('f-days').value),
         session_duration: parseInt(document.getElementById('f-duration').value),
@@ -54,7 +47,7 @@ async function saveProfileData() {
         goal: document.getElementById('f-goal').value,
         weak_point: document.getElementById('f-weak').value
     };
-    await _sb.from('profiles').upsert(profile);
+    await _sb.from('profiles').upsert(payload);
     nav('workout-gen');
 }
 
@@ -62,58 +55,51 @@ async function generateNeuralWorkout() {
     const { data: { user } } = await _sb.auth.getUser();
     const { data: p } = await _sb.from('profiles').select('*').eq('id', user.id).single();
 
-    let filtrati = ESERCIZI_DB.filter(ex => 
-        (LIVELLI.indexOf(p.experience_level) >= LIVELLI.indexOf(ex.livelloMin)) && 
-        ex.obiettivo.includes(p.goal)
-    );
-
-    let pesati = filtrati.map(ex => {
-        let score = (ex.muscoli.includes(p.weak_point)) ? 50 : 0;
-        if(ex.tipo === "base") score += 20;
-        return {...ex, score: score + Math.random() * 10};
-    }).sort((a, b) => b.score - a.score);
-
-    // LOGICA VOLUME: Se dura 90 minuti, assegna circa 10 esercizi
-    let sessionSize = Math.max(6, Math.floor(p.session_duration / 8.5));
-    let selezione = pesati.slice(0, sessionSize);
-
-    let html = `
-        <div class="glass-card">
-            <h2>Protocollo Neural v3: ${p.goal.toUpperCase()}</h2>
-            <p>Sessione da ${p.session_duration} min | Focus: ${p.weak_point}</p>
-            <table class="workout-table">
-                <thead><tr><th>Esercizio</th><th>Target</th><th>Serie x Rep</th><th>Rest</th><th>Kg</th><th>Log</th></tr></thead>
-                <tbody>`;
-
-    selezione.forEach((ex, i) => {
-        let sets = (i < 3 && p.goal === 'forza') ? 5 : 3;
-        let reps = (i < 3 && p.goal === 'forza') ? "5" : "10-12";
-        if(ex.tipo === "isolamento") reps = "15";
-
-        html += `<tr class="${ex.muscoli.includes(p.weak_point) ? 'weak-point-row' : ''}">
-            <td><strong>${ex.nome}</strong></td>
-            <td><span class="tag">${ex.muscoli[0]}</span></td>
-            <td>${sets} x ${reps}</td>
-            <td>${p.goal === 'forza' ? '3m' : '90s'}</td>
-            <td><input type="number" id="kg-${i}" class="kg-input"></td>
-            <td><button onclick="saveLog('${ex.muscoli[0]}','${ex.nome}',${sets},10,'kg-${i}')" class="log-btn">ADD</button></td>
-        </tr>`;
+    // FILTRO NEURALE
+    // Selezioniamo prima gli esercizi per il punto carente
+    let pool = MASTER_DB.filter(ex => {
+        const lvlMatch = (p.experience_level === 'beginner') ? ex.lvl === 1 : true;
+        return lvlMatch;
     });
-    document.getElementById('workout-gen').innerHTML = html + "</tbody></table></div>";
+
+    // Costruiamo la sessione: Forza -> Ipertrofia -> Pump
+    let session = [];
+    const targetSize = Math.floor(p.session_duration / 8); // ~11 esercizi per 90 min
+
+    // 1. Forza (Punto Carente o Fondamentali)
+    session.push(...pool.filter(ex => ex.tipo === "Power" && ex.muscolo === p.weak_point).slice(0, 2));
+    session.push(...pool.filter(ex => ex.tipo === "Power" && ex.muscolo !== p.weak_point).slice(0, 2));
+
+    // 2. Ipertrofia (Mix)
+    session.push(...pool.filter(ex => ex.tipo === "Hyper").sort(() => 0.5 - Math.random()).slice(0, 4));
+
+    // 3. Pump (Finale)
+    session.push(...pool.filter(ex => ex.tipo === "Pump").slice(0, 3));
+
+    // Rendering
+    let html = `<div class="container"><h2>NEURAL PROTOCOL: ACTIVE</h2>`;
+    session.slice(0, targetSize).forEach(ex => {
+        html += `
+            <div class="exercise-card ${ex.muscolo === p.weak_point ? 'priority' : ''}">
+                <div>
+                    <div class="stat-label">${ex.muscolo}</div>
+                    <div class="stat-value">${ex.nome}</div>
+                </div>
+                <div>
+                    <div class="stat-label">Serie x Reps</div>
+                    <div class="stat-value">${ex.tipo === 'Power' ? '4 x '+ex.reps : '3 x '+ex.reps}</div>
+                </div>
+                <input type="number" placeholder="Kg" class="kg-input">
+                <button class="log-btn" onclick="saveLog()">LOG</button>
+            </div>`;
+    });
+    document.getElementById('workout-gen').innerHTML = html + `</div>`;
 }
 
-async function saveLog(g, n, s, r, id) {
-    const kg = document.getElementById(id).value;
-    const { data: { user } } = await _sb.auth.getUser();
-    await _sb.from('workout_logs').insert({ user_id: user.id, muscle_group: g, exercise_name: n, weight_lifted: kg, sets: s, reps_done: r });
-    alert("Volume registrato!");
-}
-
-async function updateDash() {
-    const { data: { user } } = await _sb.auth.getUser();
-    const { data } = await _sb.from('workout_logs').select('*').eq('user_id', user.id);
-    const vol = data ? data.reduce((acc, c) => acc + (c.weight_lifted * c.reps_done * c.sets), 0) : 0;
-    document.getElementById('total-volume').innerText = vol.toLocaleString() + " kg";
+function nav(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    if(id === 'workout-gen') generateNeuralWorkout();
 }
 
 async function init() {
@@ -121,7 +107,7 @@ async function init() {
     if(user) { 
         document.getElementById('sidebar').classList.remove('hidden');
         document.getElementById('auth-screen').classList.add('hidden');
-        nav('dash'); 
+        nav('dash');
     }
 }
 init();

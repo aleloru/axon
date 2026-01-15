@@ -3,80 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXON | Neural OS v3</title>
+    <title>AXON | Neural Training OS</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="dark-theme">
+    <div id="loader" class="hidden"></div>
 
-    <nav id="sidebar" class="hidden">
-        <div class="sidebar-logo">
-            <div class="logo-box">A</div>
-            <span>AXON <strong>PRO</strong></span>
+    <aside id="sidebar" class="hidden">
+        <div class="brand">
+            <div class="axon-node"></div>
+            <h1>AXON<span>PRO</span></h1>
         </div>
-        <ul class="nav-items">
-            <li onclick="nav('dash')">📊 Dashboard Analitica</li>
-            <li onclick="nav('profile-setup')">⚙️ Configurazione Biometrica</li>
-            <li onclick="nav('workout-gen')">🏋️ Generatore Protocolli</li>
-        </ul>
-        <button onclick="logout()" class="btn-exit">DISCONNETTI</button>
-    </nav>
+        <nav>
+            <div class="nav-link active" onclick="nav('dash')">📊 MONITORING</div>
+            <div class="nav-link" onclick="nav('profile-setup')">🧬 BIOMETRICS</div>
+            <div class="nav-link" onclick="nav('workout-gen')">🧠 NEURAL PLAN</div>
+        </nav>
+        <button class="logout-btn" onclick="logout()">TERMINATE SESSION</button>
+    </aside>
 
-    <main id="app-core">
+    <main id="main-view">
         <section id="auth-screen" class="screen">
-            <div class="glass-card auth-card">
-                <div class="logo-box large">A</div>
-                <h1>Accedi al Sistema</h1>
-                <input type="email" id="email" placeholder="Email">
-                <input type="password" id="pass" placeholder="Password">
-                <button onclick="handleAuth()" class="glow-btn">INIZIALIZZA</button>
+            <div class="auth-box">
+                <h2 class="glitch">SYSTEM ACCESS</h2>
+                <div class="input-field">
+                    <input type="email" id="email" required placeholder="User Identification (Email)">
+                </div>
+                <div class="input-field">
+                    <input type="password" id="pass" required placeholder="Security Key">
+                </div>
+                <button onclick="handleAuth()" class="main-btn">LOGIN</button>
             </div>
         </section>
 
         <section id="profile-setup" class="screen hidden">
-            <div class="glass-card">
-                <h2>Parametri Atleta</h2>
-                <div class="form-grid">
-                    <div class="input-group"><label>Allenamenti a settimana</label><input type="number" id="f-days" value="4"></div>
-                    <div class="input-group"><label>Minuti disponibili/sessione</label><input type="number" id="f-duration" value="90"></div>
-                    <div class="input-group">
-                        <label>Livello Esperienza</label>
+            <div class="container">
+                <header>
+                    <h2>Parametri di Calcolo</h2>
+                    <p>L'algoritmo ottimizzerà il volume in base ai dati inseriti.</p>
+                </header>
+                <div class="grid-inputs">
+                    <div class="card-input">
+                        <label>Split Settimanale</label>
+                        <select id="f-days">
+                            <option value="3">3 Giorni (Full Body)</option>
+                            <option value="4" selected>4 Giorni (Upper/Lower)</option>
+                            <option value="5">5 Giorni (PPL + UL)</option>
+                        </select>
+                    </div>
+                    <div class="card-input">
+                        <label>Time Window (Minuti)</label>
+                        <input type="number" id="f-duration" value="90">
+                    </div>
+                    <div class="card-input">
+                        <label>Livello Neurale</label>
                         <select id="f-exp">
-                            <option value="beginner">Principiante</option>
-                            <option value="intermediate" selected>Intermedio</option>
-                            <option value="advanced">Avanzato</option>
+                            <option value="beginner">Adaptive (Beginner)</option>
+                            <option value="intermediate">Advanced (Intermediate)</option>
+                            <option value="advanced">Elite (Advanced)</option>
                         </select>
                     </div>
-                    <div class="input-group">
-                        <label>Obiettivo Dominante</label>
+                    <div class="card-input">
+                        <label>Protocollo</label>
                         <select id="f-goal">
-                            <option value="ipertrofia">Ipertrofia (Massa)</option>
-                            <option value="forza">Forza Massima</option>
+                            <option value="ipertrofia">Sarcoplasmic Hypertrophy</option>
+                            <option value="forza">Myofibrillar Power</option>
                         </select>
                     </div>
-                    <div class="input-group full-width">
-                        <label>Focus Gruppo Carente</label>
+                    <div class="card-input full">
+                        <label>Focus Prioritario</label>
                         <select id="f-weak">
-                            <option value="Petto">Pettorali</option>
-                            <option value="Schiena">Dorsali (Larghezza/Spessore)</option>
-                            <option value="Gambe">Gambe e Glutei</option>
-                            <option value="Spalle">Deltoidi</option>
-                            <option value="Braccia">Bicipiti e Tricipiti</option>
+                            <option value="Petto">Chest Development</option>
+                            <option value="Schiena">Back Depth/Width</option>
+                            <option value="Gambe">Leg/Glute Chain</option>
+                            <option value="Spalle">Shoulder Boulder</option>
+                            <option value="Braccia">Arm Specialist</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">SALVA E GENERA PROTOCOLLO</button>
+                <button onclick="saveProfileData()" class="main-btn">GENERATE PROTOCOL</button>
             </div>
         </section>
 
         <section id="workout-gen" class="screen hidden"></section>
-
-        <section id="dash" class="screen hidden">
-            <div class="glass-card">
-                <h3>Volume di Lavoro Totale</h3>
-                <div class="big-val" id="total-volume">0 <small>kg</small></div>
-            </div>
-        </section>
+        <section id="dash" class="screen hidden"></section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
