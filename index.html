@@ -16,8 +16,8 @@
         </div>
         <ul class="nav-items">
             <li onclick="nav('dash')">📊 Dashboard Analitica</li>
-            <li onclick="nav('profile-setup')">⚙️ Configurazione Biometrica</li>
-            <li onclick="nav('workout-gen')">🏋️ Protocollo Settimanale</li>
+            <li onclick="nav('workout-gen')">🏋️ Il Tuo Protocollo</li>
+            <li onclick="nav('profile-setup')">⚙️ Impostazioni Piano</li>
         </ul>
         <button onclick="logout()" class="btn-exit">DISCONNETTI</button>
     </nav>
@@ -29,20 +29,19 @@
                 <h1>Accedi al Sistema</h1>
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="pass" placeholder="Password">
-                <button onclick="handleAuth()" class="glow-btn">INIZIALIZZA</button>
+                <button onclick="handleAuth()" class="glow-btn">INIZIALIZZA NEURAL CORE</button>
             </div>
         </section>
 
         <section id="profile-setup" class="screen hidden">
             <div class="glass-card">
-                <h2>Asset Atleta</h2>
+                <h2>Configurazione Protocollo</h2>
                 <div class="form-grid">
                     <div class="input-group"><label>Giorni/Settimana</label><input type="number" id="f-days" value="4"></div>
-                    <div class="input-group"><label>Minuti/Sessione</label><input type="number" id="f-duration" value="90"></div>
                     <div class="input-group">
-                        <label>Disciplina Sportiva</label>
+                        <label>Disciplina</label>
                         <select id="f-sport">
-                            <option value="palestra" selected>Solo Palestra</option>
+                            <option value="palestra" selected>Palestra</option>
                             <option value="calcio">Calcio</option>
                             <option value="tennis">Tennis</option>
                             <option value="combat">Combat Sports</option>
@@ -50,17 +49,11 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Esperienza</label>
-                        <select id="f-exp">
-                            <option value="beginner">Principiante</option>
-                            <option value="intermediate" selected>Intermedio</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Obiettivo</label>
-                        <select id="f-goal">
-                            <option value="ipertrofia">Massa</option>
-                            <option value="forza">Forza</option>
+                        <label>Durata Ciclo</label>
+                        <select id="f-weeks">
+                            <option value="4">4 Settimane</option>
+                            <option value="6" selected>6 Settimane</option>
+                            <option value="8">8 Settimane</option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -73,15 +66,18 @@
                             <option value="Braccia">Braccia</option>
                         </select>
                     </div>
+                    <input type="hidden" id="f-duration" value="90">
+                    <input type="hidden" id="f-exp" value="intermediate">
+                    <input type="hidden" id="f-goal" value="ipertrofia">
                 </div>
-                <button onclick="saveProfileData()" class="glow-btn">GENERA PROTOCOLLO</button>
+                <button onclick="saveProfileData()" class="glow-btn">GENERA E SALVA PIANO</button>
             </div>
         </section>
 
         <section id="workout-gen" class="screen hidden"></section>
         <section id="dash" class="screen hidden">
             <div class="glass-card">
-                <h3>Neural Load Totale</h3>
+                <h3>Volume Totale Sollevato</h3>
                 <div class="big-val" id="total-volume">0 <small>kg</small></div>
             </div>
         </section>
