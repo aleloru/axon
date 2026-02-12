@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>AXON PRO - Setup Profilo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="onboarding.css" />
+
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2.47.0/dist/umd/supabase.js"></script>
+</head>
+
+<body class="onboarding-body">
+
+    <div class="onboarding-container">
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="progress-current">1</span> / <span id="progress-total">8</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Dati Personali Base -->
+        <div id="step-1" class="onboarding-step active">
+            <div class="step-header">
+                <h1 class="step-title">Benvenuto in AXON PRO</h1>
+                <p class="step-subtitle">Iniziamo con i tuoi dati personali</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="age">Età *</label>
+                    <input type="number" id="age" min="14" max="100" placeholder="25" required />
+                </div>
+
+                <div class="form-field">
+                    <label for="gender">Sesso *</label>
+                    <select id="gender" required>
+                        <option value="">Seleziona...</option>
+                        <option value="male">Maschio</option>
+                        <option value="female">Femmina</option>
+                        <option value="other">Altro</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="weight">Peso Attuale (kg) *</label>
+                    <input type="number" id="weight" min="30" max="200" step="0.1" placeholder="70.0" required />
+                </div>
+
+                <div class="form-field">
+                    <label for="height">Altezza (cm) *</label>
+                    <input type="number" id="height" min="120" max="250" placeholder="175" required />
+                </div>
+
+                <div class="form-field">
+                    <label for="target-weight">Peso Obiettivo (kg)</label>
+                    <input type="number" id="target-weight" min="30" max="200" step="0.1" placeholder="75.0" />
+                </div>
+
+                <div class="form-field">
+                    <label for="body-fat">% Grasso Corporeo (stima)</label>
+                    <input type="number" id="body-fat" min="5" max="50" step="0.5" placeholder="15" />
+                </div>
+            </div>
+
+            <button class="btn-next" onclick="nextStep()">
+                <span>CONTINUA</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Step 2: Esperienza Allenamento -->
+        <div id="step-2" class="onboarding-step">
+            <div class="step-header">
+                <h1 class="step-title">Esperienza</h1>
+                <p class="step-subtitle">La tua storia di allenamento</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field full">
+                    <label for="experience">Livello di Esperienza *</label>
+                    <select id="experience" required>
+                        <option value="">Seleziona...</option>
+                        <option value="beginner">Principiante (0-1 anno)</option>
+                        <option value="intermediate">Intermedio (1-3 anni)</option>
+                        <option value="advanced">Avanzato (3+ anni)</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="training-history">Hai mai fatto allenamento con i pesi? *</label>
+                    <select id="training-history" required>
+                        <option value="">Seleziona...</option>
+                        <option value="never">Mai</option>
+                        <option value="occasionally">Occasionalmente</option>
+                        <option value="regularly">Regolarmente (meno di 1 anno)</option>
+                        <option value="experienced">Esperienza consolidata (1+ anni)</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label>Esercizi che conosci bene</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="squat" class="known-exercise" />
+                            <span>Squat</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="deadlift" class="known-exercise" />
+                            <span>Stacco</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="bench" class="known-exercise" />
+                            <span>Panca</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="overhead_press" class="known-exercise" />
+                            <span>Military Press</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="pullups" class="known-exercise" />
+                            <span>Trazioni</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="rows" class="known-exercise" />
+                            <span>Rematori</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field full">
+                    <label for="max-squat">Record Squat (kg) - opzionale</label>
+                    <input type="number" id="max-squat" min="0" max="500" step="2.5" placeholder="100" />
+                </div>
+
+                <div class="form-field full">
+                    <label for="max-bench">Record Panca (kg) - opzionale</label>
+                    <input type="number" id="max-bench" min="0" max="300" step="2.5" placeholder="80" />
+                </div>
+
+                <div class="form-field full">
+                    <label for="max-deadlift">Record Stacco (kg) - opzionale</label>
+                    <input type="number" id="max-deadlift" min="0" max="500" step="2.5" placeholder="120" />
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-back" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>INDIETRO</span>
+                </button>
+                <button class="btn-next" onclick="nextStep()">
+                    <span>CONTINUA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Obiettivi Dettagliati -->
+        <div id="step-3" class="onboarding-step">
+            <div class="step-header">
+                <h1 class="step-title">Obiettivi</h1>
+                <p class="step-subtitle">Cosa vuoi raggiungere?</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field full">
+                    <label for="primary-goal">Obiettivo Principale *</label>
+                    <select id="primary-goal" required>
+                        <option value="">Seleziona...</option>
+                        <option value="strength">Forza Massimale</option>
+                        <option value="hypertrophy">Ipertrofia / Massa Muscolare</option>
+                        <option value="endurance">Resistenza Muscolare</option>
+                        <option value="fat_loss">Perdita di Grasso</option>
+                        <option value="athletic">Performance Atletica</option>
+                        <option value="general_fitness">Fitness Generale</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label>Obiettivi Secondari</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="mobility" class="secondary-goal" />
+                            <span>Mobilità</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="conditioning" class="secondary-goal" />
+                            <span>Condizionamento</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="aesthetics" class="secondary-goal" />
+                            <span>Estetica</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="posture" class="secondary-goal" />
+                            <span>Postura</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="core_strength" class="secondary-goal" />
+                            <span>Core Strength</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="flexibility" class="secondary-goal" />
+                            <span>Flessibilità</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field full">
+                    <label>Parti del corpo da enfatizzare</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="chest" class="focus-area" />
+                            <span>Petto</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="back" class="focus-area" />
+                            <span>Schiena</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="shoulders" class="focus-area" />
+                            <span>Spalle</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="arms" class="focus-area" />
+                            <span>Braccia</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="legs" class="focus-area" />
+                            <span>Gambe</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="glutes" class="focus-area" />
+                            <span>Glutei</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="abs" class="focus-area" />
+                            <span>Addominali</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="calves" class="focus-area" />
+                            <span>Polpacci</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field full">
+                    <label for="timeline">In quanto tempo vuoi raggiungere il tuo obiettivo? *</label>
+                    <select id="timeline" required>
+                        <option value="">Seleziona...</option>
+                        <option value="1-3">1-3 mesi</option>
+                        <option value="3-6">3-6 mesi</option>
+                        <option value="6-12">6-12 mesi</option>
+                        <option value="12+">12+ mesi</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-back" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>INDIETRO</span>
+                </button>
+                <button class="btn-next" onclick="nextStep()">
+                    <span>CONTINUA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Disponibilità e Attrezzatura -->
+        <div id="step-4" class="onboarding-step">
+            <div class="step-header">
+                <h1 class="step-title">Disponibilità</h1>
+                <p class="step-subtitle">Quanto tempo puoi dedicare?</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="training-days">Giorni a Settimana *</label>
+                    <select id="training-days" required>
+                        <option value="">Seleziona...</option>
+                        <option value="2">2 giorni</option>
+                        <option value="3">3 giorni</option>
+                        <option value="4">4 giorni</option>
+                        <option value="5">5 giorni</option>
+                        <option value="6">6 giorni</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="session-duration">Durata Sessione (min) *</label>
+                    <select id="session-duration" required>
+                        <option value="">Seleziona...</option>
+                        <option value="30">30 minuti</option>
+                        <option value="45">45 minuti</option>
+                        <option value="60">60 minuti</option>
+                        <option value="75">75 minuti</option>
+                        <option value="90">90 minuti</option>
+                        <option value="120">120 minuti</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="equipment">Attrezzatura Disponibile *</label>
+                    <select id="equipment" required>
+                        <option value="">Seleziona...</option>
+                        <option value="full_gym">Palestra Completa</option>
+                        <option value="home_gym">Home Gym (manubri, panca, rack)</option>
+                        <option value="minimal">Minimal (manubri, bande)</option>
+                        <option value="bodyweight">Solo Corpo Libero</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="preferred-time">Orario Preferito Allenamento *</label>
+                    <select id="preferred-time" required>
+                        <option value="">Seleziona...</option>
+                        <option value="morning">Mattina (6-10)</option>
+                        <option value="midday">Mezzogiorno (10-14)</option>
+                        <option value="afternoon">Pomeriggio (14-18)</option>
+                        <option value="evening">Sera (18-22)</option>
+                        <option value="night">Notte (22+)</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="workout-split">Preferenza Split *</label>
+                    <select id="workout-split" required>
+                        <option value="">Seleziona...</option>
+                        <option value="full_body">Full Body</option>
+                        <option value="upper_lower">Upper/Lower Split</option>
+                        <option value="push_pull_legs">Push/Pull/Legs</option>
+                        <option value="bro_split">Bro Split (1 muscolo/giorno)</option>
+                        <option value="ai_decide">Lascia decidere all'AI</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-back" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>INDIETRO</span>
+                </button>
+                <button class="btn-next" onclick="nextStep()">
+                    <span>CONTINUA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 5: Limitazioni e Infortuni -->
+        <div id="step-5" class="onboarding-step">
+            <div class="step-header">
+                <h1 class="step-title">Limitazioni</h1>
+                <p class="step-subtitle">Infortuni o problematiche da considerare</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field full">
+                    <label>Infortuni Attuali o Passati</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="lower_back" class="injury" />
+                            <span>Schiena Bassa</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="upper_back" class="injury" />
+                            <span>Schiena Alta</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="neck" class="injury" />
+                            <span>Collo</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="shoulders" class="injury" />
+                            <span>Spalle</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="elbows" class="injury" />
+                            <span>Gomiti</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="wrists" class="injury" />
+                            <span>Polsi</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="hips" class="injury" />
+                            <span>Anche</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="knees" class="injury" />
+                            <span>Ginocchia</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="ankles" class="injury" />
+                            <span>Caviglie</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field full">
+                    <label for="pain-level">Livello di Dolore/Fastidio (0-10)</label>
+                    <input type="number" id="pain-level" min="0" max="10" placeholder="0" />
+                </div>
+
+                <div class="form-field full">
+                    <label for="medical-notes">Note Mediche o Condizioni Particolari</label>
+                    <textarea id="medical-notes" rows="3"
+                        placeholder="Es: ernia discale L4-L5, tendinite spalla destra, ecc..."></textarea>
+                </div>
+
+                <div class="form-field full">
+                    <label>Esercizi da Evitare (se noti)</label>
+                    <textarea id="avoid-exercises" rows="2"
+                        placeholder="Es: squat profondo, military press, ecc..."></textarea>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-back" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>INDIETRO</span>
+                </button>
+                <button class="btn-next" onclick="nextStep()">
+                    <span>CONTINUA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 6: Stile di Vita e Recupero -->
+        <div id="step-6" class="onboarding-step">
+            <div class="step-header">
+                <h1 class="step-title">Stile di Vita</h1>
+                <p class="step-subtitle">Fattori che influenzano il recupero</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="sleep-hours">Ore di Sonno Medie *</label>
+                    <input type="number" id="sleep-hours" min="4" max="12" step="0.5" placeholder="7.5" required />
+                </div>
+
+                <div class="form-field">
+                    <label for="sleep-quality">Qualità del Sonno *</label>
+                    <select id="sleep-quality" required>
+                        <option value="">Seleziona...</option>
+                        <option value="poor">Scarsa</option>
+                        <option value="fair">Discreta</option>
+                        <option value="good">Buona</option>
+                        <option value="excellent">Ottima</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="stress-level">Livello di Stress (1-10) *</label>
+                    <input type="number" id="stress-level" min="1" max="10" placeholder="5" required />
+                </div>
+
+                <div class="form-field">
+                    <label for="job-type">Tipo di Lavoro *</label>
+                    <select id="job-type" required>
+                        <option value="">Seleziona...</option>
+                        <option value="sedentary">Sedentario (ufficio, scrivania)</option>
+                        <option value="active">Attivo (in piedi, movimento)</option>
+                        <option value="very_active">Molto Attivo (lavoro fisico)</option>
+                        <option value="student">Studente</option>
+                        <option value="unemployed">Disoccupato</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label>Attività Extra-Palestra</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="running" class="extra-activity" />
+                            <span>Corsa</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="cycling" class="extra-activity" />
+                            <span>Ciclismo</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="sports" class="extra-activity" />
+                            <span>Sport di Squadra</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="martial_arts" class="extra-activity" />
+                            <span>Arti Marziali</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="yoga" class="extra-activity" />
+                            <span>Yoga/Pilates</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="swimming" class="extra-activity" />
+                            <span>Nuoto</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="hiking" class="extra-activity" />
+                            <span>Trekking</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="dancing" class="extra-activity" />
+                            <span>Danza</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field full">
+                    <label for="cardio-preference">Preferenza Cardio *</label>
+                    <select id="cardio-preference" required>
+                        <option value="">Seleziona...</option>
+                        <option value="none">Nessun cardio</option>
+                        <option value="minimal">Minimo (1-2x/settimana)</option>
+                        <option value="moderate">Moderato (2-3x/settimana)</option>
+                        <option value="high">Alto (4+x/settimana)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-back" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>INDIETRO</span>
+                </button>
+                <button class="btn-next" onclick="nextStep()">
+                    <span>CONTINUA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 7: Nutrizione -->
+        <div id="step-7" class="onboarding-step">
+            <div class="step-header">
+                <h1 class="step-title">Nutrizione</h1>
+                <p class="step-subtitle">Abitudini alimentari</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field full">
+                    <label for="diet-type">Tipo di Dieta *</label>
+                    <select id="diet-type" required>
+                        <option value="">Seleziona...</option>
+                        <option value="omnivore">Onnivora</option>
+                        <option value="vegetarian">Vegetariana</option>
+                        <option value="vegan">Vegana</option>
+                        <option value="pescatarian">Pescetariana</option>
+                        <option value="keto">Chetogenica</option>
+                        <option value="paleo">Paleo</option>
+                        <option value="flexible">Flessibile</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="meals-per-day">Pasti al Giorno *</label>
+                    <select id="meals-per-day" required>
+                        <option value="">Seleziona...</option>
+                        <option value="2">2 pasti</option>
+                        <option value="3">3 pasti</option>
+                        <option value="4">4 pasti</option>
+                        <option value="5">5 pasti</option>
+                        <option value="6+">6+ pasti</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="protein-intake">Proteine al Giorno (g)</label>
+                    <input type="number" id="protein-intake" min="0" max="500" placeholder="150" />
+                </div>
+
+                <div class="form-field full">
+                    <label for="supplements">Integratori che Usi</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="protein" class="supplement" />
+                            <span>Proteine</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="creatine" class="supplement" />
+                            <span>Creatina</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="bcaa" class="supplement" />
+                            <span>BCAA</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="pre_workout" class="supplement" />
+                            <span>Pre-Workout</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="multivitamin" class="supplement" />
+                            <span>Multivitaminico</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="omega3" class="supplement" />
+                            <span>Omega-3</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field full">
+                    <label for="water-intake">Acqua al Giorno (litri) *</label>
+                    <input type="number" id="water-intake" min="0" max="10" step="0.5" placeholder="2.5" required />
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-back" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>INDIETRO</span>
+                </button>
+                <button class="btn-next" onclick="nextStep()">
+                    <span>CONTINUA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 8: Preferenze Allenamento -->
+        <div id="step-8" class="onboarding-step">
+            <div class="step-header">
+                <h1 class="step-title">Preferenze Finali</h1>
+                <p class="step-subtitle">Ultimi dettagli per personalizzare al meglio</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field full">
+                    <label for="training-style">Stile di Allenamento Preferito *</label>
+                    <select id="training-style" required>
+                        <option value="">Seleziona...</option>
+                        <option value="powerlifting">Powerlifting</option>
+                        <option value="bodybuilding">Bodybuilding</option>
+                        <option value="crossfit">CrossFit</option>
+                        <option value="calisthenics">Calisthenics</option>
+                        <option value="functional">Functional Training</option>
+                        <option value="mixed">Misto</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="intensity-preference">Preferenza Intensità *</label>
+                    <select id="intensity-preference" required>
+                        <option value="">Seleziona...</option>
+                        <option value="low">Bassa (recupero prioritario)</option>
+                        <option value="moderate">Moderata (bilanciato)</option>
+                        <option value="high">Alta (massimo stimolo)</option>
+                        <option value="variable">Variabile (periodizzazione)</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="music-preference">Musica Durante Allenamento *</label>
+                    <select id="music-preference" required>
+                        <option value="">Seleziona...</option>
+                        <option value="none">Nessuna</option>
+                        <option value="calm">Calma/Ambient</option>
+                        <option value="energetic">Energetica/Rock</option>
+                        <option value="electronic">Elettronica/EDM</option>
+                        <option value="hip_hop">Hip Hop/Rap</option>
+                        <option value="metal">Metal/Hard Rock</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="motivation-level">Livello di Motivazione Attuale *</label>
+                    <select id="motivation-level" required>
+                        <option value="">Seleziona...</option>
+                        <option value="low">Basso (ho bisogno di spinta)</option>
+                        <option value="moderate">Moderato (costante)</option>
+                        <option value="high">Alto (molto motivato)</option>
+                        <option value="extreme">Estremo (ossessionato)</option>
+                    </select>
+                </div>
+
+                <div class="form-field full">
+                    <label for="notes">Note Aggiuntive o Richieste Speciali</label>
+                    <textarea id="notes" rows="4"
+                        placeholder="Qualsiasi altra informazione che ritieni utile per personalizzare il tuo programma..."></textarea>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-back" onclick="prevStep()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>INDIETRO</span>
+                </button>
+                <button class="btn-complete" onclick="completeOnboarding()">
+                    <span id="complete-btn-text">GENERA IL MIO PROGRAMMA</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="config.js"></script>
+    <script src="onboarding.js"></script>
+</body>
+
+
+</html>

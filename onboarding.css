@@ -1,0 +1,352 @@
+/* ============================================================================
+   ONBOARDING STYLES
+   ============================================================================ */
+
+.onboarding-body {
+    background:
+        radial-gradient(circle at 20% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
+        var(--bg-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.onboarding-container {
+    max-width: 700px;
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 50px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+}
+
+/* Progress Bar */
+.progress-container {
+    margin-bottom: 50px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 242, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon), #00ffaa);
+    border-radius: 10px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 20px var(--neon-glow);
+    width: 20%;
+    /* Start at 20% (step 1 of 5) */
+}
+
+.progress-text {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    color: var(--neon);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+/* Steps */
+.onboarding-step {
+    display: none;
+    animation: fadeInUp 0.5s ease;
+}
+
+.onboarding-step.active {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.step-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--neon);
+    margin: 0 0 12px;
+    text-shadow: 0 0 20px var(--neon-glow);
+    letter-spacing: 2px;
+}
+
+.step-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field.full {
+    grid-column: 1 / -1;
+}
+
+.form-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--neon);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 14px 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all var(--transition-normal);
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    border-color: var(--neon);
+    box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1);
+    outline: none;
+}
+
+.form-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Checkbox Grid */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    user-select: none;
+}
+
+.checkbox-label:hover {
+    border-color: var(--border-hover);
+    background: rgba(0, 242, 255, 0.05);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--neon);
+}
+
+.checkbox-label input[type="checkbox"]:checked+span {
+    color: var(--neon);
+    font-weight: 600;
+}
+
+.checkbox-label span {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+/* Buttons */
+.btn-next,
+.btn-complete {
+    width: 100%;
+    padding: 18px;
+    background: transparent;
+    border: 2px solid var(--neon);
+    color: var(--neon);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-next::before,
+.btn-complete::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--neon);
+    transition: left var(--transition-normal);
+    z-index: -1;
+}
+
+.btn-next:hover::before,
+.btn-complete:hover::before {
+    left: 0;
+}
+
+.btn-next:hover,
+.btn-complete:hover {
+    color: var(--bg-primary);
+    box-shadow: var(--shadow-neon);
+    transform: translateY(-2px);
+}
+
+.btn-next:disabled,
+.btn-complete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-back {
+    padding: 16px 24px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-back:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+    transform: translateX(-4px);
+}
+
+.btn-group {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Complete Button Special */
+.btn-complete {
+    background: linear-gradient(135deg, var(--neon), #00ffaa);
+    border: none;
+    color: var(--bg-primary);
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+}
+
+.btn-complete::before {
+    display: none;
+}
+
+.btn-complete:hover {
+    box-shadow: 0 0 40px rgba(0, 242, 255, 0.5);
+    transform: translateY(-3px) scale(1.02);
+}
+
+/* Loading State */
+.btn-complete.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-complete.loading span {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .onboarding-container {
+        padding: 30px 25px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .step-title {
+        font-size: 1.5rem;
+    }
+
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-group {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-back {
+        order: 2;
+    }
+
+    .btn-next,
+    .btn-complete {
+        order: 1;
+    }
+}

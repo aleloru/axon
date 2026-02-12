@@ -1,0 +1,15 @@
+# Supabase / Environment
+.env
+config.js
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# VS Code / IDE
+.vscode/
+
+# Brain / Antigravity files
+.gemini/
+.agent/
+brain/

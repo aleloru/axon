@@ -1,0 +1,2 @@
+Questo è un file di test creato per verificare la sincronizzazione alle ore 15:15.
+Se vedi questo file, la sincronizzazione tra me e il tuo PC sta funzionando.

@@ -1,92 +1,668 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXON | Neural OS</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>NeuroCoach AI - Sistema di Allenamento Personalizzato</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Sistema AI per allenamento personalizzato basato su profilo, infortuni e attrezzatura" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap"
+    rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.47.0/dist/umd/supabase.js"></script>
+  <!-- Chart.js for statistics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
-    <nav id="sidebar" class="hidden">
-        <div class="sidebar-logo">
-            <div class="logo-box">A</div>
-            <span>AXON <strong>OS</strong></span>
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="hidden">
+    <div class="sidebar-content">
+      <div class="logo">
+        <span class="logo-neuro">Neuro</span><span class="logo-coach">Coach</span>
+        <div class="logo-subtitle">AI Training System</div>
+      </div>
+
+      <nav class="nav-menu">
+        <div class="n-link active" onclick="nav('dashboard')" data-nav="dashboard">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Overview</span>
         </div>
-        <ul class="nav-items">
-            <li onclick="nav('dash')">📊 Dashboard</li>
-            <li onclick="nav('profile-setup')">⚙️ Parametri Biometrici</li>
-            <li onclick="nav('workout-gen')">🏋️ Generatore Schede</li>
+        <div class="n-link" onclick="nav('today')" data-nav="today">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Oggi</span>
+        </div>
+        <div class="n-link" onclick="nav('workout')" data-nav="workout">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M6.5 6.5L17.5 17.5"></path>
+            <path d="M6.5 17.5L17.5 6.5"></path>
+            <circle cx="12" cy="12" r="10"></circle>
+          </svg>
+          <span>Allenamento</span>
+        </div>
+        <div class="n-link" onclick="nav('calendar')" data-nav="calendar">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Calendario</span>
+        </div>
+        <div class="n-link" onclick="nav('stats')" data-nav="stats">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <line x1="12" y1="20" x2="12" y2="10"></line>
+            <line x1="18" y1="20" x2="18" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="16"></line>
+          </svg>
+          <span>Statistiche</span>
+        </div>
+        <div class="n-link" onclick="nav('profile')" data-nav="profile">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Profilo</span>
+        </div>
+        <div class="n-link" onclick="nav('settings')" data-nav="settings">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 1v6m0 6v6M1 12h6m6 0h6"></path>
+          </svg>
+          <span>Settings</span>
+        </div>
+      </nav>
+
+      <div class="logout-wrap" onclick="logoutUser()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>LOGOUT</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEW -->
+  <main id="main-view">
+
+    <!-- LOGIN SCREEN -->
+    <section id="screen-auth" class="screen">
+      <div class="auth-container">
+        <div class="auth-card glass-card">
+          <div class="auth-header">
+            <div class="glitch-text">AXON PRO</div>
+            <div class="glitch-subtext">NEURAL INTERFACE</div>
+          </div>
+
+          <div id="auth-subtitle" class="subtitle">INSERISCI LE TUE CREDENZIALI DI ACCESSO</div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="your@email.com" autocomplete="email" />
+          </div>
+
+          <div class="form-group">
+            <label for="pass">Access Key</label>
+            <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+          </div>
+
+          <button id="auth-btn" class="btn-neon-main" onclick="handleAuth()">
+            <span id="auth-btn-text">ACCEDI AL SISTEMA</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+
+          <div id="auth-error" class="auth-error hidden"></div>
+
+          <div class="auth-toggle">
+            <span id="toggle-text">Non hai un account?</span>
+            <button class="toggle-btn" onclick="toggleAuthMode()">
+              <span id="toggle-btn-text">REGISTRATI</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD SCREEN -->
+    <section id="screen-dashboard" class="screen hidden">
+      <div class="screen-header">
+        <h1 class="title-main">Dashboard</h1>
+        <p class="subtext">
+          Panoramica completa del tuo stato di allenamento e ottimizzazioni AI in tempo reale
+        </p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <div class="stat-label">Giorni/Settimana</div>
+          <div id="stat-days" class="stat-big">3</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+            </svg>
+          </div>
+          <div class="stat-label">Obiettivo</div>
+          <div id="stat-goal" class="stat-big-small">Hypertrophy</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8"></path>
+            </svg>
+          </div>
+          <div class="stat-label">Stress Level</div>
+          <div id="stat-stress" class="stat-big">5</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </div>
+          <div class="stat-label">Setup</div>
+          <div id="stat-equip" class="stat-big-small">Full Gym</div>
+        </div>
+      </div>
+
+      <div class="glass-card dashboard-info">
+        <h3>Sistema AI Attivo</h3>
+        <p>Il tuo programma viene generato dinamicamente in base a:</p>
+        <ul class="info-list">
+          <li>Profilo di allenamento personalizzato</li>
+          <li>Infortuni e limitazioni dichiarate</li>
+          <li>Attrezzatura disponibile</li>
+          <li>Livello di stress e recupero</li>
         </ul>
-        <button onclick="logout()" class="btn-exit">TERMINA SESSIONE</button>
-    </nav>
+      </div>
+    </section>
 
-    <main id="app-core">
-        <section id="auth-screen" class="screen">
-            <div class="glass-card auth-card">
-                <div class="logo-box large">A</div>
-                <h1 id="auth-title">Neural Access</h1>
-                <input type="email" id="email" placeholder="Email">
-                <input type="password" id="pass" placeholder="Password">
-                <button onclick="handleAuth()" id="auth-btn" class="glow-btn">ACCEDI</button>
-                <p id="auth-toggle-text">Non hai un account? <span onclick="toggleAuth()" style="color:#00d2ff; cursor:pointer; text-decoration:underline;">Registrati ora</span></p>
+    <!-- TODAY'S WORKOUT SCREEN -->
+    <section id="screen-today" class="screen hidden">
+      <div class="screen-header">
+        <h1 class="title-main">Allenamento di Oggi</h1>
+        <p class="subtext" id="today-date">
+          Caricamento...
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div id="today-workout-container">
+          <!-- Dynamic content will be inserted here -->
+        </div>
+
+        <div id="today-empty" class="workout-empty hidden">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <p>Oggi è un giorno di riposo!</p>
+          <p class="subtext">Recupera le energie per il prossimo allenamento</p>
+        </div>
+      </div>
+      <div id="today-actions" class="screen-actions hidden">
+        <button class="btn-neon-main" onclick="completeCurrentSession('today')">COMPLETA SESSIONE OGGI</button>
+      </div>
+    </section>
+
+    <!-- WORKOUT SCREEN -->
+    <section id="screen-workout" class="screen hidden">
+      <div class="screen-header">
+        <h1 class="title-main">Programma Allenamento</h1>
+        <p class="subtext">
+          Piano generato dinamicamente dal sistema AI in base al tuo profilo completo
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div id="workout-list"></div>
+        <div id="workout-empty" class="workout-empty hidden">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <p>Nessun esercizio disponibile con le impostazioni attuali</p>
+          <p class="subtext">Modifica il tuo profilo per generare un programma</p>
+        </div>
+      </div>
+      <div id="workout-actions" class="screen-actions hidden">
+        <button class="btn-neon-main" onclick="openSessionLogger()">LOG SESSIONE COMPLETA</button>
+      </div>
+    </section>
+
+    <!-- CALENDAR SCREEN -->
+    <section id="screen-calendar" class="screen hidden">
+      <div class="screen-header">
+        <h1 class="title-main">Calendario Allenamenti</h1>
+        <p class="subtext">
+          Visualizza la tua cronologia di allenamenti e monitora la costanza
+        </p>
+      </div>
+
+      <div class="calendar-layout">
+        <div class="calendar-main">
+          <div class="calendar-controls">
+            <button class="calendar-nav-btn" onclick="changeMonth(-1)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <h2 id="calendar-month-year" class="calendar-title">Caricamento...</h2>
+            <button class="calendar-nav-btn" onclick="changeMonth(1)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div class="calendar-grid">
+            <div class="calendar-weekday">SUN</div>
+            <div class="calendar-weekday">MON</div>
+            <div class="calendar-weekday">TUE</div>
+            <div class="calendar-weekday">WED</div>
+            <div class="calendar-weekday">THU</div>
+            <div class="calendar-weekday">FRI</div>
+            <div class="calendar-weekday">SAT</div>
+            <!-- Calendar days will be inserted here dynamically -->
+          </div>
+
+          <div class="calendar-legend">
+            <div class="legend-item">
+              <div class="legend-color completed"></div>
+              <span>Allenamento</span>
             </div>
-        </section>
-
-        <section id="profile-setup" class="screen hidden">
-            <div class="glass-card form-container">
-                <h2>Configurazione Asset Atleta</h2>
-                <div class="form-grid">
-                    <div class="input-group"><label>Giorni/Settimana</label><input type="number" id="f-days" value="5"></div>
-                    <div class="input-group"><label>Durata (Min)</label><input type="number" id="f-duration" value="90"></div>
-                    <div class="input-group">
-                        <label>Esperienza</label>
-                        <select id="f-exp">
-                            <option value="beginner">Principiante</option>
-                            <option value="intermediate">Intermedio</option>
-                            <option value="advanced" selected>Avanzato</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Obiettivo</label>
-                        <select id="f-goal">
-                            <option value="ipertrofia">Massa</option>
-                            <option value="forza" selected>Forza</option>
-                        </select>
-                    </div>
-                    <div class="input-group full-width">
-                        <label>Punto Carente</label>
-                        <select id="f-weak">
-                            <option value="Petto">Pettorali</option>
-                            <option value="Schiena">Dorsali</option>
-                            <option value="Gambe" selected>Gambe</option>
-                            <option value="Spalle">Spalle</option>
-                        </select>
-                    </div>
-                </div>
-                <button onclick="saveProfileData()" class="glow-btn">SALVA E GENERA</button>
+            <div class="legend-item">
+              <div class="legend-color rest"></div>
+              <span>Recupero</span>
             </div>
-        </section>
+          </div>
+        </div>
 
-        <section id="workout-gen" class="screen hidden">
-            <div class="workout-header">
-                <h2>Protocollo Attivo</h2>
-                <button onclick="generateNeuralWorkout()" class="glow-btn small">Rigenera</button>
+        <!-- Sidebar Dettagli Giorno -->
+        <div id="calendar-sidebar" class="calendar-sidebar">
+          <div class="sidebar-header">
+            <h3 id="selected-day-name">Seleziona un giorno</h3>
+            <p id="selected-day-date" class="subtext">Cronologia attività</p>
+          </div>
+          <div id="day-history-content" class="day-history-content">
+            <div class="empty-selection">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <p>Clicca su un giorno per vedere i dettagli dell'allenamento</p>
             </div>
-            <div id="workout-display"></div>
-        </section>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <section id="dash" class="screen hidden">
-            <div class="glass-card stat-box">
-                <h3>Volume Totale Sollevato</h3>
-                <div class="big-val" id="total-volume">0 <small>kg</small></div>
+    <!-- STATISTICS SCREEN -->
+    <section id="screen-stats" class="screen hidden">
+      <div class="screen-header">
+        <h1 class="title-main">Statistiche</h1>
+        <p class="subtext">
+          Analizza i tuoi progressi e monitora le performance nel tempo
+        </p>
+      </div>
+
+      <!-- Stats Tabs -->
+      <div class="stats-tabs">
+        <button class="stats-tab active" onclick="switchStatsTab('general')" data-tab="general">
+          <span>Generali</span>
+        </button>
+        <button class="stats-tab" onclick="switchStatsTab('personal')" data-tab="personal">
+          <span>Personali</span>
+        </button>
+      </div>
+
+      <!-- General Stats Tab -->
+      <div id="stats-general" class="stats-tab-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+              </svg>
             </div>
-        </section>
-    </main>
+            <div class="stat-label">Allenamenti Totali</div>
+            <div id="stat-total-workouts" class="stat-big">0</div>
+          </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <div class="stat-label">Media Settimanale</div>
+            <div id="stat-avg-weekly" class="stat-big">0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                </path>
+              </svg>
+            </div>
+            <div class="stat-label">Volume Totale</div>
+            <div id="stat-total-volume" class="stat-big-small">0 kg</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+            <div class="stat-label">Streak Attuale</div>
+            <div id="stat-current-streak" class="stat-big">0</div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <h3>Frequenza Ultimi 30 Giorni</h3>
+          <div id="frequency-chart" class="chart-container">
+            <!-- Chart will be rendered here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Stats Tab -->
+      <div id="stats-personal" class="stats-tab-content hidden">
+        <div class="glass-card">
+          <h3>Record Personali</h3>
+          <div id="personal-records-list" class="records-list">
+            <!-- Personal records will be listed here -->
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <h3>Progressione Esercizio</h3>
+          <select id="exercise-selector" class="exercise-selector" onchange="loadExerciseProgression()">
+            <option value="">Seleziona un esercizio...</option>
+          </select>
+          <div id="progression-chart" class="chart-container">
+            <!-- Progression chart will be rendered here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE SCREEN -->
+    <section id="screen-profile" class="screen hidden">
+      <div class="screen-header">
+        <h1 class="title-main">Profilo Allenamento</h1>
+        <p class="subtext">
+          Personalizza il tuo profilo per ottimizzare il programma generato dall'AI
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <div class="settings-grid">
+          <div class="field full">
+            <label>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              I tuoi giorni di allenamento (Pianificazione Settimanale)
+            </label>
+            <div id="training-schedule" class="check-group">
+              <label class="check-btn">
+                <input type="checkbox" value="1" checked />
+                <span>LUN</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="2" />
+                <span>MAR</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="3" checked />
+                <span>MER</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="4" />
+                <span>GIO</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="5" checked />
+                <span>VEN</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="6" />
+                <span>SAB</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="0" />
+                <span>DOM</span>
+              </label>
+            </div>
+            <p class="subtext small">Il sistema organizzerà le tue sessioni in base a questi giorni.</p>
+          </div>
+
+          <div class="field">
+            <label for="goal">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+              </svg>
+              Obiettivo principale
+            </label>
+            <select id="goal">
+              <option value="hypertrophy" selected>Ipertrofia</option>
+              <option value="strength">Forza</option>
+              <option value="fatloss">Perdita grasso</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="equip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+              Attrezzatura disponibile
+            </label>
+            <select id="equip">
+              <option value="full" selected>Palestra completa</option>
+              <option value="home">Home gym (manubri, panca)</option>
+              <option value="body">Corpo libero</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="stress">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4m0 12v4M2 12h4m12 0h4"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              Stress / Fatica (1-10)
+            </label>
+            <input id="stress" type="number" min="1" max="10" value="5" />
+          </div>
+
+          <div class="field full">
+            <label>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Infortuni / Limitazioni
+            </label>
+            <div class="check-group">
+              <label class="check-btn">
+                <input type="checkbox" value="Schiena" />
+                <span>Schiena</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="Ginocchia" />
+                <span>Ginocchia</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="Spalle" />
+                <span>Spalle</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="Gomiti" />
+                <span>Gomiti</span>
+              </label>
+              <label class="check-btn">
+                <input type="checkbox" value="Polsi" />
+                <span>Polsi</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-sync" onclick="syncProfile()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>SINCRONIZZA PROFILO & AGGIORNA WORKOUT</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SETTINGS SCREEN -->
+    <section id="screen-settings" class="screen hidden">
+      <div class="screen-header">
+        <h1 class="title-main">Sistema & Configurazione</h1>
+        <p class="subtext">
+          Informazioni tecniche e stato del sistema NeuroCoach AI
+        </p>
+      </div>
+
+      <div class="glass-card">
+        <h3>Stato Sistema</h3>
+        <div class="settings-rows">
+          <div class="setting-row">
+            <span class="setting-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Ultimo aggiornamento AI
+            </span>
+            <span class="setting-value status-active">Real-time</span>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              Motore generazione
+            </span>
+            <span class="setting-value">Profile-based AI</span>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Database status
+            </span>
+            <span class="setting-value status-active">Online</span>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              Versione sistema
+            </span>
+            <span class="setting-value">v1.0.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <h3>Informazioni</h3>
+        <p class="info-text">
+          NeuroCoach AI è un sistema intelligente che genera programmi di allenamento
+          personalizzati in base al tuo profilo, obiettivi, attrezzatura disponibile e
+          limitazioni fisiche. Il sistema si adatta automaticamente alle tue esigenze.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rest Timer Overlay -->
+  <div id="rest-timer-overlay" class="rest-timer-overlay hidden">
+    <div class="timer-card">
+      <div class="timer-glow"></div>
+      <h3>RECUPERO IN CORSO</h3>
+      <div id="rest-time-left" class="timer-display">90s</div>
+      <button class="btn-neon-main" onclick="closeRestTimer()">SALTA RECUPERO</button>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
+
+
 </html>

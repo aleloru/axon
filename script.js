@@ -1,112 +1,1061 @@
-const SUPABASE_URL = "https://eckwueoihttjhygmeifo.supabase.co";
-const SUPABASE_KEY = "sb_publishable_UAJR8pVZKF4CRjl2-URAcQ_Z3tRg3M3";
-const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ============================================================================
+// STATO GLOBALE
+// ============================================================================
+let IS_AUTH = false;
 
-let isLoginMode = true;
-
-const EX_DATABASE = {
-    Petto: ["Panca Piana", "Dips", "Croci Cavi"],
-    Schiena: ["Trazioni", "Rematore", "Lat Machine"],
-    Gambe: ["Squat", "Leg Press", "Leg Curl"],
-    Spalle: ["Military Press", "Alzate Laterali"],
-    Braccia: ["Curl Bilanciere", "Pushdown Tricipiti"]
+let LIVE_PROFILE = {
+  training_days: 3,
+  training_schedule: [1, 3, 5], // Default: Lun, Mer, Ven
+  primary_goal: "hypertrophy",
+  equipment: "full",
+  stress_level: 5,
+  injuries: []
 };
 
-// AUTH
-function toggleAuth() {
-    isLoginMode = !isLoginMode;
-    document.getElementById('auth-title').innerText = isLoginMode ? "Neural Access" : "Create Account";
-    document.getElementById('auth-btn').innerText = isLoginMode ? "ACCEDI" : "REGISTRATI";
-    document.getElementById('auth-toggle-text').innerHTML = isLoginMode ? 
-        'Non hai un account? <span onclick="toggleAuth()" style="color:#00d2ff; cursor:pointer;">Registrati</span>' : 
-        'Hai un account? <span onclick="toggleAuth()" style="color:#00d2ff; cursor:pointer;">Accedi</span>';
-}
 
-async function handleAuth() {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('pass').value;
-    const { error } = isLoginMode ? 
-        await _sb.auth.signInWithPassword({ email, password: pass }) : 
-        await _sb.auth.signUp({ email, password: pass });
-    if (error) alert(error.message); else location.reload();
-}
+// ============================================================================
+// APP LOGIC
+// ============================================================================
 
-// NAVIGATION
-function nav(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    if(id === 'dash') updateDash();
-}
 
-// PROFILE (Fixato con experience_level)
-async function saveProfileData() {
-    const { data: { user } } = await _sb.auth.getUser();
-    const profile = {
-        id: user.id,
-        training_days: document.getElementById('f-days').value,
-        session_duration: document.getElementById('f-duration').value,
-        experience_level: document.getElementById('f-exp').value,
-        goal: document.getElementById('f-goal').value,
-        weak_point: document.getElementById('f-weak').value
-    };
-    const { error } = await _sb.from('profiles').upsert(profile);
-    if(error) alert("Errore DB: " + error.message); else nav('workout-gen');
-}
+// ============================================================================
+// STATO AUTENTICAZIONE
+// ============================================================================
+let IS_LOGIN_MODE = true;
 
-// GENERATOR
-async function generateNeuralWorkout() {
-    const { data: { user } } = await _sb.auth.getUser();
-    const { data: p } = await _sb.from('profiles').select('*').eq('id', user.id).single();
+// ============================================================================
+// TOGGLE AUTH MODE
+// ============================================================================
+window.toggleAuthMode = () => {
+  IS_LOGIN_MODE = !IS_LOGIN_MODE;
 
-    let html = `<table class="workout-table"><thead><tr><th>Esercizio</th><th>Set x Rep</th><th>Rest</th><th>Kg</th><th>Azione</th></tr></thead><tbody>`;
+  const subtitle = document.getElementById("auth-subtitle");
+  const btnText = document.getElementById("auth-btn-text");
+  const toggleText = document.getElementById("toggle-text");
+  const toggleBtnText = document.getElementById("toggle-btn-text");
 
-    Object.keys(EX_DATABASE).forEach(group => {
-        let count = (group === p.weak_point) ? 2 : 1;
-        for(let i=0; i<count; i++) {
-            const ex = EX_DATABASE[group][i % EX_DATABASE[group].length];
-            const sets = p.experience_level === 'advanced' ? 4 : 3;
-            const reps = p.goal === 'forza' ? 6 : 12;
-            const rest = p.goal === 'forza' ? '3m' : '90s';
+  if (IS_LOGIN_MODE) {
+    subtitle.textContent = "INSERISCI LE TUE CREDENZIALI DI ACCESSO";
+    btnText.textContent = "ACCEDI AL SISTEMA";
+    toggleText.textContent = "Non hai un account?";
+    toggleBtnText.textContent = "REGISTRATI";
+  } else {
+    subtitle.textContent = "CREA UN NUOVO ACCOUNT NEURAL";
+    btnText.textContent = "REGISTRA ACCOUNT";
+    toggleText.textContent = "Hai già un account?";
+    toggleBtnText.textContent = "ACCEDI";
+  }
 
-            html += `<tr>
-                <td><strong>${ex}</strong></td>
-                <td>${sets} x ${reps}</td>
-                <td>${rest}</td>
-                <td><input type="number" id="w-${ex}" style="width:70px"></td>
-                <td><button onclick="saveLog('${group}','${ex}',${sets},${reps},'${rest}','w-${ex}')" class="glow-btn" style="padding:5px">LOG</button></td>
-            </tr>`;
-        }
-    });
-    document.getElementById('workout-display').innerHTML = html + `</tbody></table>`;
-}
+  document.getElementById("auth-error").classList.add("hidden");
+};
 
-async function saveLog(group, name, sets, reps, rest, inputId) {
-    const kg = document.getElementById(inputId).value;
-    if(!kg) return;
-    const { data: { user } } = await _sb.auth.getUser();
-    await _sb.from('workout_logs').insert({
-        user_id: user.id, muscle_group: group, exercise_name: name,
-        sets: sets, reps_done: reps, weight_lifted: kg, rest_time: rest
-    });
-    alert("Dato salvato!");
-    updateDash();
-}
+// ============================================================================
+// AUTENTICAZIONE
+// ============================================================================
+window.handleAuth = async () => {
+  const emailInput = document.getElementById("email");
+  const passInput = document.getElementById("pass");
+  const errorDiv = document.getElementById("auth-error");
 
-async function updateDash() {
-    const { data: { user } } = await _sb.auth.getUser();
-    const { data } = await _sb.from('workout_logs').select('*').eq('user_id', user.id);
-    const total = data ? data.reduce((acc, curr) => acc + (curr.weight_lifted * curr.reps_done * curr.sets), 0) : 0;
-    document.getElementById('total-volume').innerText = `${total.toLocaleString()} kg`;
-}
+  const email = emailInput.value.trim();
+  const pass = passInput.value.trim();
 
-async function init() {
-    const { data: { user } } = await _sb.auth.getUser();
-    if(user) {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('sidebar').classList.remove('hidden');
-        const { data: p } = await _sb.from('profiles').select('*').eq('id', user.id).single();
-        if(!p) nav('profile-setup'); else nav('dash');
+  if (!email || !pass) {
+    showError("Inserisci email e password");
+    return;
+  }
+
+  if (pass.length < 6) {
+    showError("La password deve essere di almeno 6 caratteri");
+    return;
+  }
+
+  const btn = document.getElementById("auth-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span>ELABORAZIONE...</span>';
+
+  try {
+    let result;
+
+    if (IS_LOGIN_MODE) {
+      result = await sb.auth.signInWithPassword({ email, password: pass });
+    } else {
+      result = await sb.auth.signUp({
+        email,
+        password: pass,
+        options: { emailRedirectTo: window.location.origin }
+      });
+
+      if (result.data?.user && !result.error && !result.data.session) {
+        showError("✓ Account creato! Conferma l'email per accedere.", "success");
+        setTimeout(() => {
+          toggleAuthMode();
+        }, 3000);
+        return;
+      }
+
+      // After successful registration with session, go to onboarding
+      if (result.data?.session && !IS_LOGIN_MODE) {
+        console.log("✅ Registrazione completata, redirect a onboarding...");
+        window.location.href = 'onboarding.html';
+        return;
+      }
     }
+
+    if (result.error) throw result.error;
+
+    if (result.data?.session) {
+      loginSuccess();
+    }
+
+  } catch (error) {
+    console.error("❌ Errore autenticazione:", error);
+    console.error("Dettagli errore:", {
+      message: error.message,
+      status: error.status,
+      name: error.name
+    });
+    showError(translateError(error.message));
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<span>${IS_LOGIN_MODE ? "ACCEDI AL SISTEMA" : "REGISTRA ACCOUNT"}</span>`;
+  }
+};
+
+function translateError(msg) {
+  if (msg.includes("Invalid login credentials")) return "❌ Email o password errati";
+  if (msg.includes("Email not confirmed")) return "❌ Conferma la tua email prima";
+  if (msg.includes("already registered")) return "❌ Account già esistente";
+  return "❌ " + msg;
 }
-async function logout() { await _sb.auth.signOut(); location.reload(); }
-init();
+
+async function loginSuccess() {
+  console.log("✅ Login successful!");
+  IS_AUTH = true;
+
+  // Check if user has completed onboarding
+  const { data: { user } } = await sb.auth.getUser();
+
+  if (user) {
+    const { data: profile, error } = await sb
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', user.id)
+      .single();
+
+    if (error || !profile || !profile.onboarding_completed) {
+      // Redirect to onboarding (ONLY IF NOT ALREADY THERE)
+      if (!window.location.pathname.includes('onboarding.html')) {
+        console.log('📝 Onboarding non completato, redirect...');
+        window.location.href = 'onboarding.html';
+        return;
+      } else {
+        console.log('📝 Già su onboarding.html, resto qui.');
+        // If we are on onboarding, we don't need to do the rest of script.js UI logic 
+        // as onboarding.html has its own structure.
+        return;
+      }
+    }
+
+    console.log('✅ Onboarding completato, caricamento dashboard...');
+  }
+
+  // UI Setup for index.html
+  const authScreen = document.getElementById("screen-auth");
+  const sidebar = document.getElementById("sidebar");
+
+  if (authScreen) authScreen.classList.add("hidden");
+  if (sidebar) sidebar.classList.remove("hidden");
+
+  // Set global auth state
+  IS_AUTH = true;
+
+  if (typeof nav === 'function') nav("dashboard");
+  await loadProfile();
+}
+
+function showError(message, type = "error") {
+  const errorDiv = document.getElementById("auth-error");
+  errorDiv.textContent = message;
+  errorDiv.classList.remove("hidden");
+  errorDiv.style.color = type === "success" ? "var(--success)" : "var(--danger)";
+  errorDiv.style.borderColor = type === "success" ? "var(--success)" : "var(--danger)";
+}
+
+// ============================================================================
+// LOGOUT
+// ============================================================================
+window.logoutUser = async () => {
+  if (!confirm("Sei sicuro di voler uscire?")) return;
+  await sb.auth.signOut();
+  location.reload();
+};
+
+// ============================================================================
+// NAVIGAZIONE
+// ============================================================================
+window.nav = (id) => {
+  if (!IS_AUTH) return;
+  document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
+  const target = document.getElementById(`screen-${id}`);
+  if (target) target.classList.remove("hidden");
+
+  document.querySelectorAll(".n-link").forEach((n) => n.classList.remove("active"));
+  const activeNav = document.querySelector(`[data-nav="${id}"]`);
+  if (activeNav) activeNav.classList.add("active");
+
+  if (id === "dashboard") applyStats();
+  if (id === "workout") renderWorkout();
+  if (id === "calendar") renderCalendar();
+  if (id === "today") renderToday();
+  if (id === "stats") refreshStats();
+};
+
+// ============================================================================
+// STATISTICHE AVANZATE (SUPABASE + CHART.JS)
+// ============================================================================
+async function refreshStats() {
+  console.log("📊 Aggiornamento statistiche avanzate...");
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+
+    // 1. Fetch data
+    const { data: sessions } = await sb.from('workout_sessions').select('*, exercise_logs(*)').eq('user_id', user.id);
+
+    if (!sessions) return;
+
+    // 2. Aggregate metrics
+    const totalWorkouts = sessions.length;
+    let totalVolume = 0;
+    const muscleMap = {};
+
+    sessions.forEach(s => {
+      s.exercise_logs?.forEach(log => {
+        // Simple volume: sets * (avg reps) * (placeholder weight 20kg if 0)
+        const vol = (log.sets || 0) * (log.reps?.[0] || 0) * (log.weight?.[0] || 20);
+        totalVolume += vol;
+
+        const m = log.muscle_group || "Altro";
+        muscleMap[m] = (muscleMap[m] || 0) + 1;
+      });
+    });
+
+    // 3. Update UI counters
+    document.getElementById("stat-total-workouts").textContent = totalWorkouts;
+    document.getElementById("stat-total-volume").textContent = `${Math.round(totalVolume / 1000)}k KG`;
+    document.getElementById("stat-avg-weekly").textContent = (totalWorkouts / 4).toFixed(1); // Rough estimate
+
+    // 4. Init Charts
+    initCharts(sessions, muscleMap);
+
+  } catch (e) {
+    console.error("Errore refresh stats:", e);
+  }
+}
+
+let volumeChart = null;
+let muscleChart = null;
+
+function initCharts(sessions, muscleMap) {
+  const volCtx = document.getElementById('frequency-chart'); // Using existing ID for volume chart
+  const muscleCtx = document.getElementById('progression-chart'); // Using existing ID for muscle split
+
+  if (!volCtx) return;
+
+  // Volume Chart Data (Last 7 sessions)
+  const lastSessions = sessions.slice(-7);
+  const labels = lastSessions.map(s => s.date.split('-').slice(1).join('/'));
+  const volumes = lastSessions.map(s => {
+    let v = 0;
+    s.exercise_logs?.forEach(l => v += (l.sets * (l.reps?.[0] || 0) * 20));
+    return v;
+  });
+
+  if (volumeChart) volumeChart.destroy();
+  volumeChart = new Chart(volCtx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Volume Allenamento (kg)',
+        data: volumes,
+        borderColor: '#00f2ff',
+        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+        x: { grid: { display: false }, ticks: { color: '#888' } }
+      }
+    }
+  });
+
+  // Muscle Distribution Chart
+  const mLabels = Object.keys(muscleMap);
+  const mData = Object.values(muscleMap);
+
+  if (muscleChart) muscleChart.destroy();
+  muscleChart = new Chart(muscleCtx, {
+    type: 'radar',
+    data: {
+      labels: mLabels,
+      datasets: [{
+        label: 'Focus Muscolare',
+        data: mData,
+        backgroundColor: 'rgba(255, 0, 255, 0.2)',
+        borderColor: '#ff00ff',
+        pointBackgroundColor: '#ff00ff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          angleLines: { color: 'rgba(255,255,255,0.1)' },
+          grid: { color: 'rgba(255,255,255,0.1)' },
+          pointLabels: { color: '#888', font: { size: 10 } },
+          ticks: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================================
+// PROFESSIONAL CALENDAR LOGIC
+// ============================================================================
+let currentCalendarDate = new Date();
+
+window.changeMonth = (delta) => {
+  currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+  renderCalendar();
+};
+
+async function renderCalendar() {
+  const grid = document.querySelector(".calendar-grid");
+  const title = document.getElementById("calendar-month-year");
+  if (!grid || !title) return;
+
+  // Clear existing days (keep weekdays for now, re-append after fetch)
+  grid.innerHTML = "";
+
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+
+  // Set title
+  const monthNames = ["GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO",
+    "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"];
+  title.textContent = `${monthNames[month]} ${year}`;
+
+  // Get date info
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const startDate = new Date(year, month, 1).toISOString();
+  const endDate = new Date(year, month + 1, 0).toISOString();
+
+  const { data: sessions, error } = await sb
+    .from('workout_sessions')
+    .select('*, workout_plans(*), exercise_logs(*)')
+    .gte('date', startDate.split('T')[0])
+    .lte('date', endDate.split('T')[0]);
+
+  // Create empty slots for first week
+  const weekdaysStr = `
+    <div class="calendar-weekday">SUN</div>
+    <div class="calendar-weekday">MON</div>
+    <div class="calendar-weekday">TUE</div>
+    <div class="calendar-weekday">WED</div>
+    <div class="calendar-weekday">THU</div>
+    <div class="calendar-weekday">FRI</div>
+    <div class="calendar-weekday">SAT</div>
+  `;
+  grid.innerHTML = weekdaysStr;
+
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement("div");
+    empty.className = "calendar-day empty";
+    grid.appendChild(empty);
+  }
+
+  // Create days
+  const today = new Date();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "calendar-day";
+
+    if (year === today.getFullYear() && month === today.getMonth() && d === today.getDate()) {
+      dayDiv.classList.add("today");
+    }
+
+    // Check if there are sessions on this day
+    const daySessions = sessions?.filter(s => {
+      const sDate = new Date(s.date);
+      return sDate.getDate() === d;
+    }) || [];
+
+    dayDiv.innerHTML = `<span class="day-num">${d}</span>`;
+
+    const projectedIndex = isProjectedTrainingDay(year, month, d);
+    if (daySessions.length > 0) {
+      dayDiv.classList.add("has-workout");
+      dayDiv.innerHTML += `<div class="day-indicator workout"></div>`;
+    } else if (projectedIndex) {
+      dayDiv.classList.add("projected-workout");
+      dayDiv.innerHTML += `<div class="day-indicator projected"></div>`;
+    }
+
+    dayDiv.onclick = () => selectCalendarDay(d, daySessions);
+    grid.appendChild(dayDiv);
+  }
+}
+
+function isProjectedTrainingDay(y, m, d) {
+  const date = new Date(y, m, d);
+  const dayOfWeek = date.getDay(); // 0=Sun
+  const schedule = LIVE_PROFILE.training_schedule || [];
+
+  if (schedule.length > 0) {
+    const index = schedule.indexOf(dayOfWeek);
+    return index !== -1 ? index + 1 : null;
+  }
+
+  // Fallback to frequency-based if no manual schedule
+  const freq = parseInt(LIVE_PROFILE.training_days) || 3;
+  const schedules = {
+    2: [2, 4], // Mar, Gio
+    3: [1, 3, 5], // Lun, Mer, Ven
+    4: [1, 2, 4, 5], // Lun, Mar, Gio, Ven
+    5: [1, 2, 3, 4, 5], // Feriali
+    6: [1, 2, 3, 4, 5, 6] // Lun-Sab
+  };
+
+  const days = schedules[freq] || [];
+  const index = days.indexOf(dayOfWeek);
+  return index !== -1 ? index + 1 : null;
+}
+
+function selectCalendarDay(dayNum, sessions) {
+  // UI selection
+  document.querySelectorAll(".calendar-day").forEach(d => d.classList.remove("selected"));
+  const clicked = Array.from(document.querySelectorAll(".calendar-day")).find(d =>
+    !d.classList.contains("empty") && d.querySelector(".day-num").textContent == dayNum
+  );
+  if (clicked) clicked.classList.add("selected");
+
+  const nameEl = document.getElementById("selected-day-name");
+  const dateEl = document.getElementById("selected-day-date");
+  const contentEl = document.getElementById("day-history-content");
+
+  const date = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), dayNum);
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+  nameEl.textContent = date.toLocaleDateString('it-IT', { weekday: 'long' }).toUpperCase();
+  dateEl.textContent = date.toLocaleDateString('it-IT', options);
+
+  if (sessions.length === 0) {
+    contentEl.innerHTML = `
+      <div class="empty-selection">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+        <p>Giorno di recupero. Nessuna attività registrata.</p>
+      </div>
+    `;
+    return;
+  }
+
+  contentEl.innerHTML = sessions.map(s => `
+    <div class="history-item">
+      <div class="history-item-header">
+        <div>
+          <span class="history-exercise-name">${s.workout_plans?.name || 'Sessione Personalizzata'}</span>
+          <span class="history-volume">${s.duration_minutes || '--'} MIN</span>
+        </div>
+        <button class="btn-delete-session" onclick="deleteWorkoutSession('${s.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          CANCELLA
+        </button>
+      </div>
+      <div class="history-details">
+        ${s.exercise_logs?.map(log => {
+    const weights = log.weight || [0];
+    const reps = log.reps || [0];
+    let detailStr = "";
+    for (let i = 0; i < log.sets; i++) {
+      detailStr += `Set ${i + 1}: ${weights[i] || weights[0]}kg x ${reps[i] || reps[0]} | `;
+    }
+    return `<div>• <b>${log.exercise_name}</b><br><small>${detailStr.slice(0, -3)}</small></div>`;
+  }).join('') || 'Nessun log esercizi salvato'}
+      </div>
+    </div>
+  `).join('');
+}
+
+window.deleteWorkoutSession = async (id) => {
+  if (!confirm("Sei sicuro di voler eliminare questo allenamento? Questa azione è irreversibile.")) return;
+
+  try {
+    const { error } = await sb.from('workout_sessions').delete().eq('id', id);
+    if (error) throw error;
+
+    alert("Sessione eliminata con successo. 🗑️");
+    renderCalendar();
+    refreshStats();
+  } catch (e) {
+    console.error("Errore eliminazione sessione:", e);
+    alert("Errore durante l'eliminazione.");
+  }
+};
+
+// ============================================================================
+// DASHBOARD & PROFILO
+// ============================================================================
+async function loadProfile() {
+  console.log("👤 Caricamento profilo...");
+
+  // 1. Fallback immediato da LocalStorage
+  const saved = localStorage.getItem('neurocoach_profile');
+  if (saved) {
+    try {
+      LIVE_PROFILE = { ...LIVE_PROFILE, ...JSON.parse(saved) };
+    } catch (e) { }
+  }
+
+  // 2. Fetch da Supabase
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+      if (profile) {
+        // Mappa campi se necessario (legacy support)
+        if (profile.goal && !profile.primary_goal) profile.primary_goal = profile.goal;
+        if (profile.equip && !profile.equipment) profile.equipment = profile.equip;
+
+        LIVE_PROFILE = { ...LIVE_PROFILE, ...profile };
+        localStorage.setItem('neurocoach_profile', JSON.stringify(LIVE_PROFILE));
+      }
+    }
+  } catch (e) {
+    console.error("❌ Errore caricamento profilo Supabase:", e);
+  }
+
+  applyStats();
+}
+
+function applyStats() {
+  console.log("📊 Applicazione statistiche UI...");
+  const dDays = document.getElementById("stat-days");
+  const dStress = document.getElementById("stat-stress");
+  const dGoal = document.getElementById("stat-goal");
+  const dEquip = document.getElementById("stat-equip");
+
+  const schedule = LIVE_PROFILE.training_schedule || [1, 3, 5];
+  if (dDays) dDays.textContent = schedule.length;
+  if (dStress) dStress.textContent = LIVE_PROFILE.stress_level || 5;
+  if (dGoal) dGoal.textContent = (LIVE_PROFILE.primary_goal || 'Hypertrophy').toUpperCase();
+  if (dEquip) dEquip.textContent = (LIVE_PROFILE.equipment || 'Full Gym').toUpperCase();
+
+  // Profile Form (se presente)
+  const schedContainer = document.getElementById("training-schedule");
+  if (schedContainer) {
+    const checks = schedContainer.querySelectorAll("input[type='checkbox']");
+    checks.forEach(c => {
+      c.checked = schedule.includes(parseInt(c.value));
+    });
+
+    document.getElementById("goal").value = LIVE_PROFILE.primary_goal || 'hypertrophy';
+    document.getElementById("equip").value = LIVE_PROFILE.equipment || 'full';
+    document.getElementById("stress").value = LIVE_PROFILE.stress_level || 5;
+  }
+}
+
+window.syncProfile = async () => {
+  const btn = document.querySelector(".btn-sync");
+  const originalText = btn.innerText;
+  btn.innerText = "SINCRONIZZAZIONE...";
+
+  // Read schedule from checkboxes
+  const schedContainer = document.getElementById("training-schedule");
+  const schedule = [];
+  if (schedContainer) {
+    schedContainer.querySelectorAll("input:checked").forEach(c => schedule.push(parseInt(c.value)));
+  }
+
+  LIVE_PROFILE.training_schedule = schedule;
+  LIVE_PROFILE.training_days = schedule.length;
+  LIVE_PROFILE.primary_goal = document.getElementById("goal").value;
+  LIVE_PROFILE.equipment = document.getElementById("equip").value;
+  LIVE_PROFILE.stress_level = parseInt(document.getElementById("stress").value);
+
+  const { data: { user } } = await sb.auth.getUser();
+  if (user) {
+    await sb.from('profiles').update({
+      training_days: LIVE_PROFILE.training_days,
+      training_schedule: LIVE_PROFILE.training_schedule,
+      primary_goal: LIVE_PROFILE.primary_goal,
+      equipment: LIVE_PROFILE.equipment,
+      stress_level: LIVE_PROFILE.stress_level
+    }).eq('id', user.id);
+  }
+
+  localStorage.setItem('neurocoach_profile', JSON.stringify(LIVE_PROFILE));
+
+  alert("Profilo sincronizzato correttamente!");
+  btn.innerText = originalText;
+  applyStats();
+  // Forza ricaricamento workout dopo sync profilo
+  renderWorkout();
+};
+
+// ============================================================================
+// STATISTICHE - LOGICA TAB
+// ============================================================================
+window.switchStatsTab = (tabId) => {
+  // Update Buttons
+  document.querySelectorAll(".stats-tab").forEach(btn => btn.classList.remove("active"));
+  const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+  if (activeBtn) activeBtn.classList.add("active");
+
+  // Update Content
+  document.querySelectorAll(".stats-tab-content").forEach(content => content.classList.add("hidden"));
+  const targetContent = document.getElementById(`stats-${tabId}`);
+  if (targetContent) targetContent.classList.remove("hidden");
+
+  if (tabId === 'personal') {
+    populateExerciseSelector();
+    renderPersonalRecords();
+  }
+};
+
+async function populateExerciseSelector() {
+  const selector = document.getElementById("exercise-selector");
+  if (!selector) return;
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+
+    // Fetch unique exercise names from logs
+    const { data: logs, error } = await sb
+      .from('exercise_logs')
+      .select('exercise_name')
+      .order('exercise_name');
+
+    if (error) throw error;
+
+    // Filter unique names
+    const uniqueExercises = [...new Set(logs.map(l => l.exercise_name))];
+
+    selector.innerHTML = '<option value="">Seleziona un esercizio...</option>';
+    uniqueExercises.forEach(ex => {
+      selector.innerHTML += `<option value="${ex}">${ex}</option>`;
+    });
+
+  } catch (e) {
+    console.error("Errore popolamento selettore esercizi:", e);
+  }
+}
+
+async function renderPersonalRecords() {
+  const container = document.getElementById("personal-records-list");
+  if (!container) return;
+
+  container.innerHTML = "<div class='loading-spinner'>ANALISI RECORD...</div>";
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: logs, error } = await sb
+      .from('exercise_logs')
+      .select('exercise_name, weight');
+
+    if (error) throw error;
+
+    // Calculate PR for each exercise
+    const prs = {};
+    logs.forEach(log => {
+      const maxWeight = Math.max(...(log.weight || [0]));
+      if (!prs[log.exercise_name] || maxWeight > prs[log.exercise_name]) {
+        prs[log.exercise_name] = maxWeight;
+      }
+    });
+
+    if (Object.keys(prs).length === 0) {
+      container.innerHTML = "<p class='empty-selection'>Nessun dato ancora disponibile. Inizia ad allenarti!</p>";
+      return;
+    }
+
+    container.innerHTML = Object.entries(prs).map(([name, weight]) => `
+      <div class="record-item">
+        <div class="record-name">${name}</div>
+        <div class="record-value">${weight} KG</div>
+      </div>
+    `).join('');
+
+  } catch (e) {
+    console.error("Errore rendering PR:", e);
+    container.innerHTML = "Errore nel caricamento record.";
+  }
+}
+
+window.loadExerciseProgression = async () => {
+  const selector = document.getElementById("exercise-selector");
+  const chartContainer = document.getElementById("progression-chart");
+  if (!selector || !chartContainer) return;
+
+  const exercise = selector.value;
+  if (!exercise) {
+    chartContainer.innerHTML = "<p class='empty-selection'>Seleziona un esercizio per vedere la progressione</p>";
+    return;
+  }
+
+  chartContainer.innerHTML = "<div class='loading-spinner'>CALCOLO PROGRESSIONE...</div>";
+
+  try {
+    const { data: logs, error } = await sb
+      .from('exercise_logs')
+      .select('weight, created_at')
+      .eq('exercise_name', exercise)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    // Per ora mostriamo un riassunto testuale, in futuro un grafico reale
+    const values = logs.map(l => ({
+      date: new Date(l.created_at).toLocaleDateString(),
+      weight: Math.max(...(l.weight || [0]))
+    }));
+
+    let html = `<div class="progression-summary" style="padding-top:20px;">`;
+    values.forEach(v => {
+      html += `
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px; padding:5px; background:rgba(0,242,255,0.05); border-radius:4px;">
+          <span>${v.date}</span>
+          <b style="color:var(--neon)">${v.weight} KG</b>
+        </div>`;
+    });
+    html += `</div>`;
+    chartContainer.innerHTML = html;
+
+  } catch (e) {
+    console.error("Errore caricamento progressione:", e);
+    chartContainer.innerHTML = "Errore durante l'analisi dati.";
+  }
+};
+
+// ============================================================================
+// OGGI (TODAY'S WORKOUT)
+// ============================================================================
+async function renderToday() {
+  const container = document.getElementById("today-workout-container");
+  const dateEl = document.getElementById("today-date");
+  const emptyEl = document.getElementById("today-empty");
+  if (!container || !dateEl) return;
+
+  const now = new Date();
+  dateEl.textContent = now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+
+  container.innerHTML = "<div class='loading-spinner'>ANALISI BIOMETRICA...</div>";
+  emptyEl.classList.add("hidden");
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: plans } = await sb.from('workout_plans').select('*').eq('user_id', user.id).eq('is_active', true).limit(1);
+
+    if (!plans || plans.length === 0) {
+      container.innerHTML = "";
+      emptyEl.classList.remove("hidden");
+      emptyEl.querySelector("p").textContent = "Nessun piano attivo. Generane uno nel Profilo!";
+      return;
+    }
+
+    const plan = plans[0];
+    const todayIndex = isProjectedTrainingDay(now.getFullYear(), now.getMonth(), now.getDate());
+    const planDayKey = todayIndex ? `day${todayIndex}` : null;
+
+    if (!planDayKey || !plan.exercises[planDayKey]) {
+      container.innerHTML = "";
+      emptyEl.classList.remove("hidden");
+      return;
+    }
+
+    // CHECK IF ALREADY LOGGED TODAY
+    const todayStr = now.toISOString().split('T')[0];
+    const { data: todaySessions } = await sb.from('workout_sessions')
+      .select('*, exercise_logs(*)')
+      .eq('user_id', user.id)
+      .eq('date', todayStr)
+      .limit(1);
+
+    const existingSession = todaySessions && todaySessions.length > 0 ? todaySessions[0] : null;
+
+    container.innerHTML = `
+      <div class="today-plan-header">${existingSession ? 'SESSIONE COMPLETATA (MODIFICA)' : 'SESSIONE DI OGGI'}: ${planDayKey.toUpperCase()}</div>
+      <div class="ex-list" id="today-ex-list">
+        ${plan.exercises[planDayKey].map((ex, exIdx) => {
+      let setsHtml = "";
+      const loggedEx = existingSession?.exercise_logs?.find(l => l.exercise_name === ex.n);
+
+      for (let s = 0; s < ex.sets; s++) {
+        const valW = loggedEx?.weight?.[s] || "";
+        const valR = loggedEx?.reps?.[s] || "";
+        setsHtml += `
+              <div class="set-row">
+                <span class="set-num">SET ${s + 1}</span>
+                <input type="number" class="track-input" placeholder="KG" id="weight-${exIdx}-${s}" value="${valW}">
+                <input type="number" class="track-input" placeholder="REPS" id="reps-${exIdx}-${s}" value="${valR}">
+              </div>`;
+      }
+      return `
+            <div class="ex-row tracker-row-multi">
+              <div class="ex-header-row">
+                <b>${ex.n}</b>
+                <button class="btn-rest" onclick="startRestTimer(90)">REST 90s</button>
+              </div>
+              <div class="sets-container">
+                ${setsHtml}
+              </div>
+            </div>
+          `;
+    }).join('')}
+      </div>
+    `;
+
+    // Show action button
+    const actions = document.getElementById("today-actions");
+    if (actions) {
+      actions.classList.remove("hidden");
+      const btn = actions.querySelector(".btn-neon-main");
+      if (btn) btn.innerText = existingSession ? "AGGIORNA SESSIONE" : "COMPLETA SESSIONE";
+      // Store current plan/day for completion
+      window.CURRENT_TODAY_SESSION = { planId: plan.id, dayKey: planDayKey, exercises: plan.exercises[planDayKey] };
+    }
+
+  } catch (e) {
+    container.innerHTML = "Errore durante il caricamento.";
+  }
+}
+
+window.completeCurrentSession = async (source) => {
+  const session = window.CURRENT_TODAY_SESSION;
+  if (!session) return;
+
+  const btn = document.querySelector(`#${source}-actions .btn-neon-main`);
+  const originalText = btn.innerText;
+  btn.innerText = "REGISTRAZIONE IN CORSO...";
+  btn.disabled = true;
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    const today = new Date().toISOString().split('T')[0];
+
+    // 0. Check for existing session
+    const { data: existing } = await sb.from('workout_sessions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('date', today)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      if (!confirm("Hai già registrato un allenamento oggi. Vuoi sovrascriverlo?")) {
+        return;
+      }
+      // Delete existing to "overwrite"
+      await sb.from('workout_sessions').delete().eq('id', existing[0].id);
+    }
+
+    // 1. Create session
+    const { data: ws, error: wsErr } = await sb.from('workout_sessions').insert({
+      user_id: user.id,
+      workout_plan_id: session.planId,
+      date: today,
+      duration_minutes: 60,
+      completed: true
+    }).select().single();
+
+    if (wsErr) throw wsErr;
+
+    // 2. Create exercise logs with actual values for EACH set
+    const logs = session.exercises.map((ex, exIdx) => {
+      const weights = [];
+      const reps = [];
+
+      for (let s = 0; s < ex.sets; s++) {
+        const wVal = document.getElementById(`weight-${exIdx}-${s}`)?.value;
+        const rVal = document.getElementById(`reps-${exIdx}-${s}`)?.value;
+
+        const w = parseFloat(wVal) || 0;
+        const r = parseInt(rVal) || parseInt(ex.reps) || 12;
+        weights.push(w);
+        reps.push(r);
+      }
+
+      return {
+        session_id: ws.id,
+        exercise_name: ex.n,
+        muscle_group: ex.m,
+        sets: ex.sets,
+        reps: reps,
+        weight: weights
+      };
+    });
+
+    const { error: logErr } = await sb.from('exercise_logs').insert(logs);
+    if (logErr) throw logErr;
+
+    alert("Sessione registrata con successo! Calendario aggiornato. 🦾");
+
+    // Refresh UI
+    nav('calendar');
+    renderCalendar();
+
+  } catch (e) {
+    console.error("Errore salvataggio sessione:", e);
+    alert("Errore durante il salvataggio.");
+  } finally {
+    btn.innerText = originalText;
+    btn.disabled = false;
+  }
+};
+
+// ============================================================================
+// GENERAZIONE WORKOUT
+// ============================================================================
+// ============================================================================
+// GENERAZIONE WORKOUT (INTERACTIVE TRACKER)
+// ============================================================================
+async function renderWorkout() {
+  const container = document.getElementById("workout-list");
+  if (!container) return;
+
+  container.innerHTML = "<div class='loading-spinner'>ANALISI BIOMETRICA...</div>";
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: plans } = await sb.from('workout_plans').select('*').eq('user_id', user.id).eq('is_active', true).limit(1);
+
+    if (plans && plans.length > 0) {
+      const plan = plans[0];
+      const exercises = plan.exercises;
+      container.innerHTML = "";
+
+      Object.keys(exercises).forEach(dayKey => {
+        const dayNum = dayKey.replace('day', '');
+        let html = `<div class="ex-day-header">Sessione ${dayNum}</div><div class="ex-list">`;
+        exercises[dayKey].forEach((ex, idx) => {
+          html += `
+            <div class="ex-row">
+              <div class="ex-info">
+                <b>${ex.n}</b><br>
+                <small>${ex.m}</small>
+              </div>
+              <div class="ex-volume">${ex.sets} x ${ex.reps}</div>
+            </div>`;
+        });
+        html += `</div>`;
+        container.insertAdjacentHTML("beforeend", html);
+      });
+
+      // Show action button
+      const actions = document.getElementById("workout-actions");
+      if (actions) actions.classList.remove("hidden");
+      window.CURRENT_WORKOUT_PLAN = plan;
+
+    } else {
+      // Fallback a MASTER_DB se non ci sono piani su Supabase
+      console.log("ℹ️ Nessun piano su Supabase, uso MASTER_DB");
+      container.innerHTML = "";
+      const filtered = window.MASTER_DB.filter(ex => {
+        if (LIVE_PROFILE.equipment === "body" && ex.type !== "body") return false;
+        return true;
+      });
+
+      for (let d = 1; d <= (LIVE_PROFILE.training_days || 3); d++) {
+        let html = `<div class="ex-day-header">Sessione Provvisoria ${d}</div><div class="ex-list">`;
+        filtered.slice((d - 1) * 4, d * 4).forEach(ex => {
+          html += `
+            <div class="ex-row">
+              <div class="ex-info"><b>${ex.n}</b><br><small>${ex.m}</small></div>
+              <div class="ex-volume">${ex.sets} x ${ex.reps}</div>
+            </div>`;
+        });
+        html += `</div>`;
+        container.insertAdjacentHTML("beforeend", html);
+      }
+    }
+  } catch (e) {
+    console.error("❌ Errore in renderWorkout:", e);
+    container.innerHTML = "Errore nel caricamento del programma.";
+  }
+}
+
+window.openSessionLogger = () => {
+  const plan = window.CURRENT_WORKOUT_PLAN;
+  if (!plan) return;
+
+  // Per ora simuliamo il completamento del "Giorno 1" se cliccato dalla scheda completa
+  // In futuro potremmo far scegliere all'utente quale giorno ha fatto
+  if (confirm("Vuoi registrare il completamento del Giorno 1 di questo piano?")) {
+    window.CURRENT_TODAY_SESSION = {
+      planId: plan.id,
+      dayKey: 'day1',
+      exercises: plan.exercises['day1']
+    };
+    completeCurrentSession('workout');
+  }
+};
+
+// ============================================================================
+// INIZIALIZZAZIONE
+// ============================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.location.pathname.includes("onboarding.html")) return;
+
+  console.log("🚀 AXON PRO inizializzato");
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      loginSuccess();
+    }
+  });
+});
+
+// ============================================================================
+// REST TIMER
+// ============================================================================
+let restInterval = null;
+window.startRestTimer = (seconds) => {
+  const overlay = document.getElementById("rest-timer-overlay");
+  const timeDisplay = document.getElementById("rest-time-left");
+  if (!overlay || !timeDisplay) return;
+
+  overlay.classList.remove("hidden");
+  let left = seconds;
+
+  clearInterval(restInterval);
+  restInterval = setInterval(() => {
+    left--;
+    timeDisplay.textContent = left + "s";
+    if (left <= 0) {
+      clearInterval(restInterval);
+      overlay.classList.add("hidden");
+      alert("Recupero terminato! Torna sotto al peso. 🦾");
+    }
+  }, 1000);
+};
+
+window.closeRestTimer = () => {
+  clearInterval(restInterval);
+  document.getElementById("rest-timer-overlay").classList.add("hidden");
+};
