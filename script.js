@@ -245,6 +245,11 @@ async function refreshStats() {
     // 3. Update UI counters
     document.getElementById("stat-total-workouts").textContent = totalWorkouts;
     document.getElementById("stat-total-volume").textContent = `${Math.round(totalVolume / 1000)}k KG`;
+    document.getElementById("stat-sessions").innerText = LIVE_PROFILE.total_sessions || "0";
+    
+    // Inizializza le nuove funzioni Neurali
+    initNeuralDashboard(LIVE_PROFILE);
+    calculateNeuralRank(LIVE_PROFILE);
     document.getElementById("stat-avg-weekly").textContent = (totalWorkouts / 4).toFixed(1); // Rough estimate
 
     // 4. Init Charts
@@ -915,11 +920,17 @@ window.completeCurrentSession = async (source) => {
     const { error: logErr } = await sb.from('exercise_logs').insert(logs);
     if (logErr) throw logErr;
 
-    alert("Sessione registrata con successo! Calendario aggiornato. 🦾");
+    // Update total_sessions in profile
+    LIVE_PROFILE.total_sessions = (LIVE_PROFILE.total_sessions || 0) + 1;
+    await sb.from('profiles').update({ total_sessions: LIVE_PROFILE.total_sessions }).eq('id', user.id);
+    localStorage.setItem('neurocoach_profile', JSON.stringify(LIVE_PROFILE));
 
-    // Refresh UI
-    nav('calendar');
-    renderCalendar();
+    // Play Success Sound
+    playNeuralSound('complete');
+    
+    showError("Neural link synced. Session recorded.", "success");
+    nav("dashboard");
+    applyStats();
 
   } catch (e) {
     console.error("Errore salvataggio sessione:", e);
@@ -958,10 +969,20 @@ async function renderWorkout() {
           html += `
             <div class="ex-row">
               <div class="ex-info">
-                <b>${ex.n}</b><br>
-                <small>${ex.m}</small>
+                <div class="ex-name">${ex.n}</div>
+                <div class="ex-muscle">${ex.m}</div>
+                <button class="btn-swap-neural" onclick="swapExercise('${ex.n}', ${idx})">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L21 2" />
+                  </svg>
+                  NEURAL SWAP
+                </button>
               </div>
-              <div class="ex-volume">${ex.sets} x ${ex.reps}</div>
+              <div class="ex-volume">
+                <span class="ex-sets">${ex.sets}</span>
+                <span class="ex-separator">x</span>
+                <span class="ex-reps">${ex.reps}</span>
+              </div>
             </div>`;
         });
         html += `</div>`;
@@ -1018,8 +1039,41 @@ window.openSessionLogger = () => {
 };
 
 // ============================================================================
-// INIZIALIZZAZIONE
+// DYNAMIC ADAPTATION: EXERCISE SWAP
 // ============================================================================
+
+const NEURAL_ALTERNATIVES = {
+  "Panca Piana": "Chest Press",
+  "Panca Inclinata": "Dumbbell Incline Press",
+  "Squat": "Leg Press",
+  "Stacco da terra": "Leg Curl",
+  "Pull up": "Lat Machine",
+  "Rematore": "Pulley",
+  "Military Press": "Shoulder Press",
+  "Curl Bilanciere": "Curl Manubri",
+  "Pushdown": "Dip Machine"
+};
+
+function swapExercise(currentName, index) {
+  playNeuralSound('click');
+  const alt = NEURAL_ALTERNATIVES[currentName];
+  
+  if (!alt) {
+    showError("Nessuna alternativa neurale trovata per questo esercizio.");
+    return;
+  }
+  
+  if (confirm(`Confermi lo swap: ${currentName} -> ${alt}?`)) {
+    // Aggiorna il workout corrente in memoria
+    const currentWorkout = JSON.parse(localStorage.getItem('neurocoach_current_workout'));
+    if (currentWorkout && currentWorkout.exercises[index]) {
+      currentWorkout.exercises[index].exercise_name = alt;
+      localStorage.setItem('neurocoach_current_workout', JSON.stringify(currentWorkout));
+      renderToday(); // Ricarica la vista
+      showError(`Neural Link Adapted: ${alt} caricato.`, "success");
+    }
+  }
+}
 document.addEventListener('DOMContentLoaded', () => {
   if (window.location.pathname.includes("onboarding.html")) return;
 
@@ -1032,13 +1086,105 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================================
+// AUDIO FEEDBACK (WEB AUDIO API)
+// ============================================================================
+
+const AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
+
+function playNeuralSound(type) {
+  if (AUDIO_CONTEXT.state === 'suspended') {
+    AUDIO_CONTEXT.resume();
+  }
+
+  const osc = AUDIO_CONTEXT.createOscillator();
+  const gain = AUDIO_CONTEXT.createGain();
+  
+  osc.connect(gain);
+  gain.connect(AUDIO_CONTEXT.destination);
+
+  const now = AUDIO_CONTEXT.currentTime;
+
+  switch (type) {
+    case 'timer_start':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(440, now + 0.1);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      osc.start(now);
+      osc.stop(now + 0.2);
+      break;
+      
+    case 'timer_end':
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(880, now + 0.1);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+      break;
+
+    case 'complete':
+      // Effetto "Successo" Neurale
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      osc.start(now);
+      osc.stop(now + 0.5);
+      break;
+      
+    case 'click':
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, now);
+      gain.gain.setValueAtTime(0.02, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.start(now);
+      osc.stop(now + 0.05);
+      break;
+  }
+}
+
+// ============================================================================
+// NEURAL RANKING & BADGES
+// ============================================================================
+
+function calculateNeuralRank(profile) {
+  const sessions = profile.total_sessions || 0;
+  let rank = "RECRUIT";
+  let color = "var(--text-muted)";
+  
+  if (sessions > 50) {
+    rank = "NEURAL OVERLORD";
+    color = "var(--danger)";
+  } else if (sessions > 20) {
+    rank = "CYBORG ELITE";
+    color = "var(--success)";
+  } else if (sessions > 5) {
+    rank = "SYCHRONIZED";
+    color = "var(--neon)";
+  }
+  
+  const rankEl = document.getElementById("neural-rank-display");
+  if (rankEl) {
+    rankEl.innerText = rank;
+    rankEl.style.color = color;
+    rankEl.style.textShadow = `0 0 10px ${color}`;
+  }
+}
+
+// ============================================================================
 // REST TIMER
 // ============================================================================
 let restInterval = null;
+// Hook Audio into Rest Timer
 window.startRestTimer = (seconds) => {
+  playNeuralSound('timer_start');
   const overlay = document.getElementById("rest-timer-overlay");
-  const timeDisplay = document.getElementById("rest-time-left");
-  if (!overlay || !timeDisplay) return;
+  const timeDisplay = document.getElementById("rest-time-left"); // Changed to timeDisplay
+  if (!overlay || !timeDisplay) return; // Changed to timeDisplay
 
   overlay.classList.remove("hidden");
   let left = seconds;
@@ -1046,11 +1192,17 @@ window.startRestTimer = (seconds) => {
   clearInterval(restInterval);
   restInterval = setInterval(() => {
     left--;
-    timeDisplay.textContent = left + "s";
+    timeDisplay.textContent = left + "s"; // Changed to timeDisplay
+    if (left <= 3 && left > 0) {
+       playNeuralSound('click');
+    }
     if (left <= 0) {
       clearInterval(restInterval);
-      overlay.classList.add("hidden");
-      alert("Recupero terminato! Torna sotto al peso. 🦾");
+      playNeuralSound('timer_end');
+      setTimeout(() => {
+        overlay.classList.add("hidden");
+        alert("Recupero terminato! Torna sotto al peso. 🦾");
+      }, 1000); // Delay closing overlay to allow sound to play
     }
   }, 1000);
 };

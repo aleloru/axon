@@ -154,16 +154,83 @@
       </div>
     </section>
 
-    <!-- DASHBOARD SCREEN -->
-    <section id="screen-dashboard" class="screen hidden">
-      <div class="screen-header">
-        <h1 class="title-main">Dashboard</h1>
-        <p class="subtext">
-          Panoramica completa del tuo stato di allenamento e ottimizzazioni AI in tempo reale
-        </p>
-      </div>
+      <!-- DASHBOARD SCREEN -->
+      <section id="screen-dashboard" class="screen hidden">
+        <div class="screen-header">
+          <div class="header-main-row">
+            <h1 class="title-main">OVERVIEW SISTEMA</h1>
+            <div class="neural-rank-badge">
+              <span class="rank-label">STATUS:</span>
+              <span id="neural-rank-display" class="rank-value">INITIALIZING...</span>
+            </div>
+          </div>
+          <p class="subtext">Stato del collegamento neurale e analisi biometrics.</p>
+        </div>
 
-      <div class="stats-grid">
+        <div class="neural-dashboard-grid">
+          <!-- Readiness Gauge -->
+          <div class="glass-card readiness-card">
+            <div class="card-header">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93" />
+              </svg>
+              <h3>NEURAL READINESS</h3>
+            </div>
+            <div class="readiness-display">
+              <div class="gauge-container">
+                <svg viewBox="0 0 100 50">
+                  <path class="gauge-bg" d="M10,45 A35,35 0 0,1 90,45" fill="none" stroke-width="8"></path>
+                  <path id="readiness-gauge" class="gauge-fill" d="M10,45 A35,35 0 0,1 90,45" fill="none" stroke-width="8" stroke-dasharray="125.6" stroke-dashoffset="125.6"></path>
+                </svg>
+                <div id="readiness-value" class="readiness-value">--%</div>
+              </div>
+              <p id="readiness-advice" class="readiness-advice">Inizializzazione biometria...</p>
+            </div>
+          </div>
+
+          <!-- AI Insights -->
+          <div class="glass-card insights-card">
+            <div class="card-header">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                <polyline points="7.5 19.79 7.5 14.63 3 12"></polyline>
+                <polyline points="21 12 16.5 14.63 16.5 19.79"></polyline>
+                <polyline points="3 8 7.5 10.63 7.5 14.63"></polyline>
+                <polyline points="21 8 16.5 10.63 16.5 14.63"></polyline>
+                <line x1="12" y1="22" x2="12" y2="15"></line>
+                <line x1="12" y1="8" x2="12" y2="1.37"></line>
+              </svg>
+              <h3>NEURAL INSIGHTS</h3>
+            </div>
+            <div id="insights-container" class="insights-list">
+              <div class="loading-spinner">Analisi flussi dati...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="heat-map-container">
+          <div class="glass-card heat-map-card">
+            <div class="card-header">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z" />
+              </svg>
+              <h3>MUSCLE ACTIVATION MAP</h3>
+            </div>
+            <div class="muscle-map-layout">
+              <div id="human-map-svg" class="human-map-svg">
+                <!-- SVG body parts will be injected here via JS -->
+              </div>
+              <div class="map-legend">
+                <div class="legend-item"><span class="dot low"></span><span>Riposo</span></div>
+                <div class="legend-item"><span class="dot mid"></span><span>Attivo</span></div>
+                <div class="legend-item"><span class="dot high"></span><span>Neural Peak</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

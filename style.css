@@ -507,14 +507,35 @@ input::placeholder {
   margin-bottom: 35px;
 }
 
-.title-main {
-  font-family: 'Orbitron', sans-serif;
-  margin: 0 0 12px;
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--neon);
-  text-shadow: 0 0 20px var(--neon-glow);
+.header-main-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.neural-rank-badge {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rank-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 800;
   letter-spacing: 2px;
+}
+
+.rank-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 1px;
 }
 
 .subtext {
@@ -732,6 +753,29 @@ input::placeholder {
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.btn-swap-neural {
+  background: rgba(0, 242, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--neon);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.6rem;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--transition-fast);
+  margin-bottom: 5px;
+}
+
+.btn-swap-neural:hover {
+  background: rgba(0, 242, 255, 0.15);
+  border-color: var(--neon);
+  box-shadow: 0 0 10px var(--neon-glow);
 }
 
 .ex-volume {
