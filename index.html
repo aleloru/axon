@@ -154,6 +154,44 @@
       </div>
     </section>
 
+      <!-- DAILY CHECK-IN MODAL -->
+      <div id="modal-check-in" class="modal-overlay hidden">
+        <div class="glass-card modal-content checkin-modal">
+          <div class="card-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M2 12h20" />
+            </svg>
+            <h2 style="margin:0; font-family:'Orbitron',sans-serif; font-size:1.2rem; letter-spacing:2px;">DAILY NEURAL SYNC</h2>
+          </div>
+          <p class="modal-subtext">Sincronizza i tuoi biometrics per ottimizzare il Readiness Score di oggi.</p>
+          
+          <div class="checkin-form">
+            <div class="input-group">
+              <label style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--neon);">Ore di Sonno: <span id="sleep-val-display" style="font-weight:900;">7</span>h</label>
+              <input type="range" id="checkin-sleep" min="4" max="12" step="0.5" value="7" style="width:100%;" oninput="document.getElementById('sleep-val-display').innerText = this.value">
+              <div class="range-labels" style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--text-muted); margin-top:5px;">
+                <span>4h</span>
+                <span>8h (Ottimale)</span>
+                <span>12h</span>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label style="display:block; margin-bottom:10px; font-size:0.85rem; color:var(--neon);">Livello di Stress Percepito</label>
+              <select id="checkin-stress" class="cyber-select">
+                <option value="Bassa">Bassa - Focus Totale</option>
+                <option value="Media" selected>Media - Sincronizzazione Stabile</option>
+                <option value="Alta">Alta - Possibile Sovraccarico</option>
+              </select>
+            </div>
+
+            <button class="btn-primary full-width" onclick="submitDailyCheckin()" style="margin-top:10px;">
+              SINCRONIZZA BIOMETRIA 🦾
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- DASHBOARD SCREEN -->
       <section id="screen-dashboard" class="screen hidden">
         <div class="screen-header">
