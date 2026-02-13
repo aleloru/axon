@@ -626,8 +626,6 @@ async function submitDailyCheckin() {
     showError("Errore sincronizzazione: " + err.message);
   }
 }
-  applyStats();
-}
 
 function applyStats() {
   console.log("📊 Applicazione statistiche UI...");
@@ -725,8 +723,8 @@ async function updateMuscleHeatMap() {
 
     const { data: logs } = await sb
       .from('exercise_logs')
-      .select('muscle_group')
-      .eq('user_id', user.id)
+      .select('muscle_group, workout_sessions!inner(user_id)')
+      .eq('workout_sessions.user_id', user.id)
       .gte('created_at', sevenDaysAgo.toISOString());
 
     const activation = {};
@@ -776,8 +774,8 @@ async function generateNeuralInsights() {
 
     const { data: logs } = await sb
       .from('exercise_logs')
-      .select('*')
-      .eq('user_id', user.id)
+      .select('*, workout_sessions!inner(user_id)')
+      .eq('workout_sessions.user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -1326,6 +1324,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================================
 
 const AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
+
+// "Neural Wake-up": Unlock audio on first interaction
+document.addEventListener('click', () => {
+  if (AUDIO_CONTEXT.state === 'suspended') {
+    AUDIO_CONTEXT.resume().then(() => {
+      console.log("🔊 Neural Audio Engine: ONLINE");
+    });
+  }
+}, { once: true });
 
 function playNeuralSound(type) {
   if (AUDIO_CONTEXT.state === 'suspended') {
