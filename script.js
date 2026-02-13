@@ -582,9 +582,177 @@ function applyStats() {
       c.checked = schedule.includes(parseInt(c.value));
     });
 
-    document.getElementById("goal").value = LIVE_PROFILE.primary_goal || 'hypertrophy';
-    document.getElementById("equip").value = LIVE_PROFILE.equipment || 'full';
     document.getElementById("stress").value = LIVE_PROFILE.stress_level || 5;
+  }
+
+  // Inizializza le nuove funzioni Neurali
+  initNeuralDashboard(LIVE_PROFILE);
+  calculateNeuralRank(LIVE_PROFILE);
+}
+
+// ============================================================================
+// NEURAL INTELLIGENCE & ANALYTICS
+// ============================================================================
+
+async function initNeuralDashboard(profile) {
+  calculateNeuralReadiness(profile);
+  updateMuscleHeatMap();
+  generateNeuralInsights();
+}
+
+function calculateNeuralReadiness(profile) {
+  const sleep = profile.sleep_hours || 7;
+  const stress = profile.stress_level || "Media";
+  
+  // Algoritmo di Readiness Base (0-100)
+  let score = 50;
+  
+  // Fattore Sonno (ottimale 8 ore)
+  score += (sleep - 7) * 10;
+  
+  // Fattore Stress
+  const stressModifiers = { "Bassa": 15, "Media": 0, "Alta": -20 };
+  score += stressModifiers[stress] || 0;
+  
+  // Limiti
+  score = Math.max(10, Math.min(100, score));
+  
+  // Aggiorna UI
+  const gauge = document.getElementById("readiness-gauge");
+  const valueText = document.getElementById("readiness-value");
+  const adviceText = document.getElementById("readiness-advice");
+  
+  if (gauge) {
+    // 125.6 è lo stroke-dasharray per il semicerchio
+    const offset = 125.6 - (125.6 * score / 100);
+    gauge.style.strokeDashoffset = offset;
+    
+    // Colore dinamico
+    if (score > 80) gauge.style.stroke = "var(--success)";
+    else if (score < 50) gauge.style.stroke = "var(--danger)";
+    else gauge.style.stroke = "var(--neon)";
+  }
+  
+  if (valueText) valueText.innerText = `${score}%`;
+  
+  if (adviceText) {
+    if (score > 85) adviceText.innerText = "Stato Neurale Ottimale. Oggi puoi spingere al massimo e cercare nuovi PR.";
+    else if (score > 60) adviceText.innerText = "Sincronizzazione Stabile. Allenamento standard consigliato.";
+    else if (score > 40) adviceText.innerText = "Low Power State. Considera di ridurre il carico del 10%.";
+    else adviceText.innerText = "Neural Fatigue Detected. Riposo o sessione di scarico obbligatoria.";
+  }
+}
+
+async function updateMuscleHeatMap() {
+  const container = document.getElementById("human-map-svg");
+  if (!container) return;
+
+  // Carica gli ultimi 7 giorni di allenamenti
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+
+    const { data: logs } = await sb
+      .from('exercise_logs')
+      .select('muscle_group')
+      .eq('user_id', user.id)
+      .gte('created_at', sevenDaysAgo.toISOString());
+
+    const activation = {};
+    if (logs) {
+      logs.forEach(l => {
+        const muscle = l.muscle_group?.toLowerCase();
+        activation[muscle] = (activation[muscle] || 0) + 1;
+      });
+    }
+
+    // Genera SVG dinamico degli omini
+    container.innerHTML = `
+      <svg viewBox="0 0 200 200" style="width:100%; height:100%;">
+        <!-- Testa -->
+        <circle cx="100" cy="30" r="15" fill="${getActivationColor(activation.collo)}" />
+        <!-- Busto -->
+        <rect x="80" y="50" width="40" height="60" rx="5" fill="${getActivationColor(activation.petto || activation.addome)}" />
+        <!-- Braccia -->
+        <rect x="55" y="55" width="20" height="50" rx="5" fill="${getActivationColor(activation.braccia || activation.bicipiti)}" />
+        <rect x="125" y="55" width="20" height="50" rx="5" fill="${getActivationColor(activation.braccia || activation.tricipiti)}" />
+        <!-- Spalle -->
+        <circle cx="70" cy="55" r="10" fill="${getActivationColor(activation.spalle)}" />
+        <circle cx="130" cy="55" r="10" fill="${getActivationColor(activation.spalle)}" />
+        <!-- Gambe -->
+        <rect x="80" y="115" width="18" height="60" rx="5" fill="${getActivationColor(activation.gambe || activation.quadricipiti)}" />
+        <rect x="102" y="115" width="18" height="60" rx="5" fill="${getActivationColor(activation.gambe || activation.femorali)}" />
+      </svg>
+    `;
+  } catch (e) {
+    console.error("Errore Muscle Map:", e);
+  }
+}
+
+function getActivationColor(value) {
+  if (!value) return "rgba(255,255,255,0.05)";
+  if (value > 4) return "var(--neon)";
+  return "rgba(0, 242, 255, 0.4)";
+}
+
+async function generateNeuralInsights() {
+  const container = document.getElementById("insights-container");
+  if (!container) return;
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+
+    const { data: logs } = await sb
+      .from('exercise_logs')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (!logs || logs.length === 0) {
+      container.innerHTML = `<div class="insight-item"><p class="insight-text">In attesa di dati per generare analisi predittive...</p></div>`;
+      return;
+    }
+
+    const insights = [];
+
+    // 1. Analisi Volume Recente
+    const recentVolume = logs.slice(0, 10).reduce((acc, l) => acc + (l.sets * (l.reps?.[0] || 0) * (l.weight?.[0] || 20)), 0);
+    const prevVolume = logs.slice(10, 20).reduce((acc, l) => acc + (l.sets * (l.reps?.[0] || 0) * (l.weight?.[0] || 20)), 0);
+
+    if (recentVolume > prevVolume * 1.05) {
+      insights.push({
+        type: "PRESTAZIONE",
+        text: "Volume neurale in crescita. Il tuo sistema nervoso si sta adattando bene ai carichi."
+      });
+    }
+
+    // 2. Analisi PR Predittiva
+    const benchLogs = logs.filter(l => l.exercise_name?.toLowerCase().includes("panca"));
+    if (benchLogs.length >= 2) {
+      const last = benchLogs[0].weight?.[0] || 0;
+      const prev = benchLogs[1].weight?.[0] || 0;
+      if (last > prev) {
+        insights.push({
+          type: "PREDICTIVE",
+          text: `In base alla tua ultima sessione di Panca, prevedo un potenziale incremento di +2.5kg nella prossima settimana.`
+        });
+      }
+    }
+
+    // Render finale
+    container.innerHTML = insights.map(i => `
+      <div class="insight-item">
+        <div class="insight-type">${i.type}</div>
+        <p class="insight-text">${i.text}</p>
+      </div>
+    `).join("") || `<div class="insight-item"><p class="insight-text">Analisi completata. Sincronizzazione stabile.</p></div>`;
+  } catch (e) {
+    console.error("Errore insights:", e);
   }
 }
 
