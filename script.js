@@ -550,16 +550,19 @@ async function loadProfile() {
         if (profile.goal && !profile.primary_goal) profile.primary_goal = profile.goal;
         if (profile.equip && !profile.equipment) profile.equipment = profile.equip;
 
-    // Aggiorna cache e carica dashboard
-    LIVE_PROFILE = profile;
-    localStorage.setItem('neurocoach_profile', JSON.stringify(LIVE_PROFILE));
-    
-    // Check-in Giornaliero
-    checkDailySync();
-    
-    nav('dashboard');
-    applyStats();
+        // Aggiorna cache e carica dashboard
+        LIVE_PROFILE = profile;
+        localStorage.setItem('neurocoach_profile', JSON.stringify(LIVE_PROFILE));
+        
+        // Check-in Giornaliero
+        checkDailySync();
+        
+        nav('dashboard');
+        applyStats();
+      }
+    }
   } catch (err) {
+    console.error("❌ Errore caricamento profilo Supabase:", err);
     showError("Errore applicazione profilo: " + err.message);
   }
 }
