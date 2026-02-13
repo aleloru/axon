@@ -1103,6 +1103,71 @@ input::placeholder {
   height: 16px;
 }
 
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 450px;
+  padding: 30px !important;
+  border: 1px solid var(--neon) !important;
+  box-shadow: 0 0 30px rgba(0, 242, 255, 0.2) !important;
+}
+
+.modal-subtext {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 25px;
+  line-height: 1.4;
+}
+
+.checkin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--neon);
+  cursor: pointer;
+}
+
+.cyber-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 15px) center;
+}
+
 /* Checkboxes */
 .check-group {
   display: flex;

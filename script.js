@@ -550,14 +550,79 @@ async function loadProfile() {
         if (profile.goal && !profile.primary_goal) profile.primary_goal = profile.goal;
         if (profile.equip && !profile.equipment) profile.equipment = profile.equip;
 
-        LIVE_PROFILE = { ...LIVE_PROFILE, ...profile };
-        localStorage.setItem('neurocoach_profile', JSON.stringify(LIVE_PROFILE));
-      }
-    }
-  } catch (e) {
-    console.error("❌ Errore caricamento profilo Supabase:", e);
+    // Aggiorna cache e carica dashboard
+    LIVE_PROFILE = profile;
+    localStorage.setItem('neurocoach_profile', JSON.stringify(LIVE_PROFILE));
+    
+    // Check-in Giornaliero
+    checkDailySync();
+    
+    nav('dashboard');
+    applyStats();
+  } catch (err) {
+    showError("Errore applicazione profilo: " + err.message);
   }
+}
 
+async function checkDailySync() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Controlla se esiste già un check-in per oggi
+  const { data: checkin } = await sb
+    .from('daily_checkins')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('date', today)
+    .single();
+
+  if (!checkin) {
+    // Apri il modal
+    document.getElementById("modal-check-in").classList.remove("hidden");
+    playNeuralSound('timer_start');
+  } else {
+    // Usa i dati del check-in per il Readiness
+    LIVE_PROFILE.sleep_hours = checkin.sleep_hours;
+    LIVE_PROFILE.stress_level = checkin.stress_level;
+    calculateNeuralReadiness(LIVE_PROFILE);
+  }
+}
+
+async function submitDailyCheckin() {
+  const sleep = parseFloat(document.getElementById("checkin-sleep").value);
+  const stress = document.getElementById("checkin-stress").value;
+  
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+
+  const today = new Date().toISOString().split('T')[0];
+
+  try {
+    const { error } = await sb.from('daily_checkins').insert({
+      user_id: user.id,
+      date: today,
+      sleep_hours: sleep,
+      stress_level: stress
+    });
+
+    if (error && error.code !== '23505') throw error; // 23505 = unique constraint
+
+    // Chiudi modal e aggiorna UI
+    document.getElementById("modal-check-in").classList.add("hidden");
+    playNeuralSound('complete');
+    
+    // Aggiorna profilo in memoria per il Readiness immediato
+    LIVE_PROFILE.sleep_hours = sleep;
+    LIVE_PROFILE.stress_level = stress;
+    calculateNeuralReadiness(LIVE_PROFILE);
+    
+    showError("Sincronizzazione biometria completata. Neural link ottimizzato.", "success");
+  } catch (err) {
+    showError("Errore sincronizzazione: " + err.message);
+  }
+}
   applyStats();
 }
 
